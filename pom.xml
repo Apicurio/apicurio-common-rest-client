@@ -8,6 +8,8 @@
     <artifactId>apicurio-common-rest-client</artifactId>
     <packaging>pom</packaging>
     <version>0.0.1-SNAPSHOT</version>
+
+
     <name>apicurio-common-rest-client</name>
 
     <url>https://www.apicur.io/</url>
@@ -30,6 +32,14 @@
         <system>GitHub</system>
         <url>https://github.com/Apicurio/apicurio-common-rest-client/issues</url>
     </issueManagement>
+
+
+    <modules>
+        <module>rest-client-jdk</module>
+        <module>rest-client-vertx</module>
+        <module>rest-client-auth</module>
+        <module>rest-client-common</module>
+    </modules>
 
 
     <properties>
