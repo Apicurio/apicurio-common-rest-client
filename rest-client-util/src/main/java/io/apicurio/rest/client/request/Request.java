@@ -38,9 +38,10 @@ public class Request<T> {
     private final Map<String, List<String>> queryParams;
     private final TypeReference<T> responseType;
     private final InputStream data;
+    private final String dataString;
     private final List<String> pathParams;
 
-    private Request(Operation operation, String requestPath, Map<String, String> headers, Map<String, List<String>> queryParams, TypeReference<T> responseType, InputStream data, List<String> pathParams) {
+    private Request(Operation operation, String requestPath, Map<String, String> headers, Map<String, List<String>> queryParams, TypeReference<T> responseType, InputStream data, List<String> pathParams, String dataString) {
         this.operation = operation;
         this.requestPath = requestPath;
         this.headers = new HashMap<>(headers);
@@ -48,6 +49,7 @@ public class Request<T> {
         this.responseType = responseType;
         this.data = data;
         this.pathParams = pathParams;
+        this.dataString = dataString;
 
         if (!this.headers.containsKey(CONTENT_TYPE)) {
             this.headers.put(CONTENT_TYPE, "application/json");
@@ -81,6 +83,10 @@ public class Request<T> {
         return data;
     }
 
+    public String getDataString() {
+        return dataString;
+    }
+
     public List<String> getPathParams() {
         return pathParams;
     }
@@ -92,6 +98,7 @@ public class Request<T> {
         private Map<String, List<String>> queryParams = Collections.emptyMap();
         private TypeReference<T> typeReference;
         private InputStream data;
+        private String dataString;
         private List<String> pathParams = Collections.emptyList();
 
         public RequestBuilder<T> operation(Operation operation) {
@@ -124,13 +131,18 @@ public class Request<T> {
             return this;
         }
 
+        public RequestBuilder<T> data(String data) {
+            this.dataString = data;
+            return this;
+        }
+
         public RequestBuilder<T> pathParams(List<String> pathParams) {
             this.pathParams = pathParams;
             return this;
         }
 
         public Request<T> build() {
-            return new Request<>(operation, path, headers, queryParams, typeReference, data, pathParams);
+            return new Request<>(operation, path, headers, queryParams, typeReference, data, pathParams, dataString);
         }
     }
 }

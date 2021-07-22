@@ -11,5 +11,15 @@
 
     <artifactId>apicurio-common-rest-client-vertx</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>io.apicurio</groupId>
+            <artifactId>apicurio-common-rest-client-util</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-web-client</artifactId>
+        </dependency>
+    </dependencies>
 
 </project>

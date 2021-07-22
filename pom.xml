@@ -47,6 +47,7 @@
         <maven.compiler.target>11</maven.compiler.target>
         <jackson.version>2.12.4</jackson.version>
         <apache-commons.version>3.12.0</apache-commons.version>
+        <vertx.version>3.9.6</vertx.version>
     </properties>
 
     <dependencyManagement>
@@ -67,9 +68,9 @@
                 <version>${jackson.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-lang3</artifactId>
-                <version>${apache-commons.version}</version>
+                <groupId>io.vertx</groupId>
+                <artifactId>vertx-web-client</artifactId>
+                <version>${vertx.version}</version>
             </dependency>
 
             <dependency>

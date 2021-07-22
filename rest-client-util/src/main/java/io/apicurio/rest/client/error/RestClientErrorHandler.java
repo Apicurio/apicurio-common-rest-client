@@ -6,9 +6,9 @@ import java.io.InputStream;
 
 public interface RestClientErrorHandler {
 
-    public RestClientException handleErrorResponse(InputStream body, int statusCode);
+    public ApicurioRestClientException handleErrorResponse(InputStream body, int statusCode);
 
-    public RestClientException parseError(Exception ex);
+    public ApicurioRestClientException parseError(Exception ex);
 
-    public RestClientException parseInputSerializingError(JsonProcessingException ex);
+    public ApicurioRestClientException parseInputSerializingError(JsonProcessingException ex);
 }
