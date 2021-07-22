@@ -18,10 +18,11 @@ package io.apicurio.rest.client.spi;
 
 
 import io.apicurio.rest.client.auth.Auth;
+import io.apicurio.rest.client.error.RestClientErrorHandler;
 
 import java.util.Map;
 
 public interface ApicurioHttpClientProvider {
 
-    ApicurioHttpClient create(String endpoint, Map<String, Object> configs, Auth auth);
+    ApicurioHttpClient create(String endpoint, Map<String, Object> configs, Auth auth, RestClientErrorHandler errorHandler);
 }

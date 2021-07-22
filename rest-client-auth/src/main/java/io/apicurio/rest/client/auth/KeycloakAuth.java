@@ -18,13 +18,16 @@ package io.apicurio.rest.client.auth;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.apicurio.rest.client.auth.request.KeycloakRequestsProvider;
-import io.apicurio.rest.client.auth.request.TokenRequestBody;
 import io.apicurio.rest.client.spi.ApicurioHttpClient;
 import io.apicurio.rest.client.spi.ApicurioHttpClientProvider;
 import io.apicurio.rest.client.spi.ApicurioHttpClientServiceLoader;
 
+import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 
 /**
@@ -33,8 +36,6 @@ import java.util.Map;
 public class KeycloakAuth implements Auth {
 
     private static final String BEARER = "Bearer ";
-    private static final String TOKEN_ENDPOINT = "/protocol/openid-connect/token";
-    private static final String TOKEN_URL_FORMAT = "%s/realms/%s" + TOKEN_ENDPOINT;
     private static final String GRANT_TYPE = "client_credentials";
 
     private static final ApicurioHttpClientServiceLoader serviceLoader = new ApicurioHttpClientServiceLoader();
@@ -50,6 +51,7 @@ public class KeycloakAuth implements Auth {
 
     private final ApicurioHttpClient apicurioHttpClient;
 
+    //TODO implement an error handler just for auth requests?
     public KeycloakAuth(String serverUrl, String realm, String clientId, String clientSecret) {
         this.serverUrl = serverUrl;
         this.realm = realm;
@@ -65,7 +67,7 @@ public class KeycloakAuth implements Auth {
     }
 
     private ApicurioHttpClient resolveApicurioHttpClient() {
-        return resolveProviderInstance().create(serverUrl, Collections.emptyMap(), null);
+        return resolveProviderInstance().create(serverUrl, Collections.emptyMap(), null, new AuthErrorHandler());
     }
 
     /**
@@ -81,8 +83,13 @@ public class KeycloakAuth implements Auth {
 
     private AccessTokenResponse obtainAccessToken() {
         try {
-            final TokenRequestBody tokenRequestBody = new TokenRequestBody(clientId, clientSecret, GRANT_TYPE);
-            return apicurioHttpClient.sendRequest(KeycloakRequestsProvider.obtainAccessToken(tokenRequestBody, realm));
+            final Map<String, String> params = Map.of("grant_type", GRANT_TYPE, "client_id", clientId, "client_secret", clientSecret);
+            final String paramsEncoded = params.entrySet().stream().map(entry -> String.join("=",
+                    URLEncoder.encode(entry.getKey(), UTF_8),
+                    URLEncoder.encode(entry.getValue(), UTF_8))
+            ).collect(Collectors.joining("&"));
+
+            return apicurioHttpClient.sendRequest(KeycloakRequestsProvider.obtainAccessToken(paramsEncoded, realm));
 
         } catch (JsonProcessingException e) {
             throw new IllegalStateException("Error found while trying to request a new token to keycloak");
