@@ -111,6 +111,7 @@ public class KeycloakAuth implements Auth {
     }
 
     private boolean isTokenExpired() {
+        //FIXME implement expiration check
         return true;
         //return (cachedAccessTokenExpTime != 0L) && (long) Time.currentTime() > accessTokenParsed.getExp();
     }
