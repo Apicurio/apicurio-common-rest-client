@@ -39,7 +39,9 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class KeycloakAuth implements Auth {
 
     private static final String BEARER = "Bearer ";
-    private static final String GRANT_TYPE = "client_credentials";
+    private static final String CLIENT_CREDENTIALS_GRANT = "client_credentials";
+    private static final String PASSWORD_GRANT = "password";
+
 
     private static final ApicurioHttpClientServiceLoader serviceLoader = new ApicurioHttpClientServiceLoader();
 
@@ -93,7 +95,7 @@ public class KeycloakAuth implements Auth {
 
     private AccessTokenResponse obtainAccessToken() {
         try {
-            final Map<String, String> params = Map.of("grant_type", GRANT_TYPE, "client_id", clientId, "client_secret", clientSecret);
+            final Map<String, String> params = Map.of("grant_type", CLIENT_CREDENTIALS_GRANT, "client_id", clientId, "client_secret", clientSecret);
             final String paramsEncoded = params.entrySet().stream().map(entry -> String.join("=",
                     URLEncoder.encode(entry.getKey(), UTF_8),
                     URLEncoder.encode(entry.getValue(), UTF_8))
@@ -106,46 +108,28 @@ public class KeycloakAuth implements Auth {
         }
     }
 
+    public String obtainAccessTokenWithBasicCredentials(String username, String password) {
+        try {
+            final Map<String, String> params = Map.of("grant_type", PASSWORD_GRANT, "client_id", clientId, "client_secret", clientSecret, "username", username, "password", password);
+            final String paramsEncoded = params.entrySet().stream().map(entry -> String.join("=",
+                    URLEncoder.encode(entry.getKey(), UTF_8),
+                    URLEncoder.encode(entry.getValue(), UTF_8))
+            ).collect(Collectors.joining("&"));
+
+            return apicurioHttpClient.sendRequest(KeycloakRequestsProvider.obtainAccessToken(paramsEncoded, realm)).getToken();
+
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Error found while trying to request a new token to keycloak");
+        }
+    }
+
     private boolean isAccessTokenRequired() {
         return null == cachedAccessToken || isTokenExpired();
     }
 
     private boolean isTokenExpired() {
+        //FIXME implement expiration check
         return true;
         //return (cachedAccessTokenExpTime != 0L) && (long) Time.currentTime() > accessTokenParsed.getExp();
-    }
-
-    public static class Builder {
-        private String serverUrl;
-        private String realm;
-        private String clientId;
-        private String clientSecret;
-
-        public Builder() {
-        }
-
-        public Builder withRealm(String realm) {
-            this.realm = realm;
-            return this;
-        }
-
-        public Builder withClientId(String clientId) {
-            this.clientId = clientId;
-            return this;
-        }
-
-        public Builder withClientSecret(String clientSecret) {
-            this.clientSecret = clientSecret;
-            return this;
-        }
-
-        public Builder withServerUrl(String serverUrl) {
-            this.serverUrl = serverUrl;
-            return this;
-        }
-
-        public KeycloakAuth build() {
-            return new KeycloakAuth(this.serverUrl, this.realm, this.clientId, this.clientSecret);
-        }
     }
 }
