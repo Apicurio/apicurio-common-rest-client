@@ -17,11 +17,13 @@
 package io.apicurio.rest.client.auth;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.apicurio.rest.client.VertxHttpClient;
 import io.apicurio.rest.client.auth.exception.AuthErrorHandler;
 import io.apicurio.rest.client.auth.request.KeycloakRequestsProvider;
 import io.apicurio.rest.client.spi.ApicurioHttpClient;
 import io.apicurio.rest.client.spi.ApicurioHttpClientProvider;
 import io.apicurio.rest.client.spi.ApicurioHttpClientServiceLoader;
+import io.vertx.core.Vertx;
 
 import java.net.URLEncoder;
 import java.util.Collections;
@@ -52,13 +54,20 @@ public class KeycloakAuth implements Auth {
 
     private final ApicurioHttpClient apicurioHttpClient;
 
-    //TODO implement an error handler just for auth requests?
     public KeycloakAuth(String serverUrl, String realm, String clientId, String clientSecret) {
         this.serverUrl = serverUrl;
         this.realm = realm;
         this.clientId = clientId;
         this.clientSecret = clientSecret;
         this.apicurioHttpClient = resolveApicurioHttpClient();
+    }
+
+    public KeycloakAuth(Vertx vertx, String serverUrl, String realm, String clientId, String clientSecret) {
+        this.serverUrl = serverUrl;
+        this.realm = realm;
+        this.clientId = clientId;
+        this.clientSecret = clientSecret;
+        this.apicurioHttpClient = new VertxHttpClient(vertx, serverUrl, Collections.emptyMap(), null, new AuthErrorHandler());
     }
 
     private static ApicurioHttpClientProvider resolveProviderInstance() {

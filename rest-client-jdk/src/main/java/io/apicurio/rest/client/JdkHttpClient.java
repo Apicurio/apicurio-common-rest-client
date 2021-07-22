@@ -2,7 +2,7 @@ package io.apicurio.rest.client;
 
 
 import io.apicurio.rest.client.auth.Auth;
-import io.apicurio.rest.client.config.ClientConfig;
+import io.apicurio.rest.client.config.ApicurioClientConfig;
 import io.apicurio.rest.client.error.RestClientErrorHandler;
 import io.apicurio.rest.client.handler.BodyHandler;
 import io.apicurio.rest.client.request.Request;
@@ -49,12 +49,12 @@ public class JdkHttpClient implements ApicurioHttpClient {
         if (!endpoint.endsWith("/")) {
             endpoint += "/";
         }
-        /*Object disableAutoBasePathAppend = configs.get(ClientConfig.APICURIO_CLIENT_DISABLE_AUTO_BASE_PATH_APPEND);
+        Object disableAutoBasePathAppend = configs.get(ApicurioClientConfig.APICURIO_CLIENT_DISABLE_AUTO_BASE_PATH_APPEND);
         if (!toBoolean(disableAutoBasePathAppend)) {
-            if (!endpoint.endsWith(String.valueOf(configs.get(ClientConfig.APICURIO_CLIENT_AUTO_BASE_PATH)))) {
-                endpoint += configs.get(ClientConfig.APICURIO_CLIENT_AUTO_BASE_PATH);
+            if (!endpoint.endsWith(String.valueOf(configs.get(ApicurioClientConfig.APICURIO_CLIENT_AUTO_BASE_PATH)))) {
+                endpoint += configs.getOrDefault(ApicurioClientConfig.APICURIO_CLIENT_AUTO_BASE_PATH, "");
             }
-        }*/
+        }
 
         final HttpClient.Builder httpClientBuilder = handleConfiguration(configs);
         this.endpoint = endpoint;
@@ -74,9 +74,9 @@ public class JdkHttpClient implements ApicurioHttpClient {
     private static void addHeaders(Map<String, Object> configs) {
 
         Map<String, String> requestHeaders = configs.entrySet().stream()
-                .filter(map -> map.getKey().startsWith(ClientConfig.APICURIO_REQUEST_HEADERS_PREFIX))
+                .filter(map -> map.getKey().startsWith(ApicurioClientConfig.APICURIO_REQUEST_HEADERS_PREFIX))
                 .collect(Collectors.toMap(map -> map.getKey()
-                        .replace(ClientConfig.APICURIO_REQUEST_HEADERS_PREFIX, ""), map -> map.getValue().toString()));
+                        .replace(ApicurioClientConfig.APICURIO_REQUEST_HEADERS_PREFIX, ""), map -> map.getValue().toString()));
 
         if (!requestHeaders.isEmpty()) {
             requestHeaders.forEach(DEFAULT_HEADERS::put);
@@ -108,11 +108,11 @@ public class JdkHttpClient implements ApicurioHttpClient {
     private static TrustManager[] getTrustManagers(Map<String, Object> configs) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
         TrustManager[] trustManagers = null;
 
-        if (configs.containsKey(ClientConfig.APICURIO_REQUEST_TRUSTSTORE_LOCATION)) {
-            String truststoreType = (String) configs.getOrDefault(ClientConfig.APICURIO_REQUEST_TRUSTSTORE_TYPE, "JKS");
+        if (configs.containsKey(ApicurioClientConfig.APICURIO_REQUEST_TRUSTSTORE_LOCATION)) {
+            String truststoreType = (String) configs.getOrDefault(ApicurioClientConfig.APICURIO_REQUEST_TRUSTSTORE_TYPE, "JKS");
             KeyStore truststore = KeyStore.getInstance(truststoreType);
-            String truststorePwd = (String) configs.getOrDefault(ClientConfig.APICURIO_REQUEST_TRUSTSTORE_PASSWORD, "");
-            truststore.load(new FileInputStream((String) configs.get(ClientConfig.APICURIO_REQUEST_TRUSTSTORE_LOCATION)), truststorePwd.toCharArray());
+            String truststorePwd = (String) configs.getOrDefault(ApicurioClientConfig.APICURIO_REQUEST_TRUSTSTORE_PASSWORD, "");
+            truststore.load(new FileInputStream((String) configs.get(ApicurioClientConfig.APICURIO_REQUEST_TRUSTSTORE_LOCATION)), truststorePwd.toCharArray());
             TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             trustManagerFactory.init(truststore);
             trustManagers = trustManagerFactory.getTrustManagers();
@@ -123,15 +123,15 @@ public class JdkHttpClient implements ApicurioHttpClient {
     private static KeyManager[] getKeyManagers(Map<String, Object> configs) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, UnrecoverableKeyException {
         KeyManager[] keyManagers = null;
 
-        if (configs.containsKey(ClientConfig.APICURIO_REQUEST_KEYSTORE_LOCATION)) {
-            String keystoreType = (String) configs.getOrDefault(ClientConfig.APICURIO_REQUEST_KEYSTORE_TYPE, "JKS");
+        if (configs.containsKey(ApicurioClientConfig.APICURIO_REQUEST_KEYSTORE_LOCATION)) {
+            String keystoreType = (String) configs.getOrDefault(ApicurioClientConfig.APICURIO_REQUEST_KEYSTORE_TYPE, "JKS");
             KeyStore keystore = KeyStore.getInstance(keystoreType);
-            String keyStorePwd = (String) configs.getOrDefault(ClientConfig.APICURIO_REQUEST_KEYSTORE_PASSWORD, "");
-            keystore.load(new FileInputStream((String) configs.get(ClientConfig.APICURIO_REQUEST_KEYSTORE_LOCATION)), keyStorePwd.toCharArray());
+            String keyStorePwd = (String) configs.getOrDefault(ApicurioClientConfig.APICURIO_REQUEST_KEYSTORE_PASSWORD, "");
+            keystore.load(new FileInputStream((String) configs.get(ApicurioClientConfig.APICURIO_REQUEST_KEYSTORE_LOCATION)), keyStorePwd.toCharArray());
 
             KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
             // If no key password provided, try using the keystore password
-            String keyPwd = (String) configs.getOrDefault(ClientConfig.APICURIO_REQUEST_KEY_PASSWORD, keyStorePwd);
+            String keyPwd = (String) configs.getOrDefault(ApicurioClientConfig.APICURIO_REQUEST_KEY_PASSWORD, keyStorePwd);
             keyManagerFactory.init(keystore, keyPwd.toCharArray());
             keyManagers = keyManagerFactory.getKeyManagers();
         }

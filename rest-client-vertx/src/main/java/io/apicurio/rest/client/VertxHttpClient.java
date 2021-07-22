@@ -1,7 +1,7 @@
 package io.apicurio.rest.client;
 
 import io.apicurio.rest.client.auth.Auth;
-import io.apicurio.rest.client.config.ClientConfig;
+import io.apicurio.rest.client.config.ApicurioClientConfig;
 import io.apicurio.rest.client.error.RestClientErrorHandler;
 import io.apicurio.rest.client.request.Request;
 import io.apicurio.rest.client.response.ResponseHandler;
@@ -51,9 +51,9 @@ public class VertxHttpClient implements ApicurioHttpClient {
     private static void processConfiguration(Map<String, Object> configs) {
 
         Map<String, String> requestHeaders = configs.entrySet().stream()
-                .filter(map -> map.getKey().startsWith(ClientConfig.APICURIO_REQUEST_HEADERS_PREFIX))
+                .filter(map -> map.getKey().startsWith(ApicurioClientConfig.APICURIO_REQUEST_HEADERS_PREFIX))
                 .collect(Collectors.toMap(map -> map.getKey()
-                        .replace(ClientConfig.APICURIO_REQUEST_HEADERS_PREFIX, ""), map -> map.getValue().toString()));
+                        .replace(ApicurioClientConfig.APICURIO_REQUEST_HEADERS_PREFIX, ""), map -> map.getValue().toString()));
 
         if (!requestHeaders.isEmpty()) {
             requestHeaders.forEach(DEFAULT_HEADERS::put);

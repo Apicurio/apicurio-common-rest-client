@@ -1,6 +1,6 @@
 package io.apicurio.rest.client.config;
 
-public class ClientConfig {
+public class ApicurioClientConfig {
 
     public static final String APICURIO_REQUEST_HEADERS_PREFIX = "apicurio.rest.request.headers.";
     public static final String APICURIO_REQUEST_TRUSTSTORE_PREFIX = "apicurio.rest.request.ssl.truststore";
