@@ -82,7 +82,7 @@ jobs:
 
 
       - name: Verify Build
-        run: docker run -t --rm -v $(pwd)/:/home/ jimador/docker-jdk-8-maven-node bash -c 'cd /home && mvn clean install -Ptranspilation'
+        run: docker run -t --rm -v $(pwd)/:/home/ jimador/docker-jdk-8-maven-node bash -c 'cd /home && mvn clean install'
 
 
       - name: Commit Release Version Change
