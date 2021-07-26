@@ -19,7 +19,7 @@ package io.apicurio.rest.client.auth;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.apicurio.rest.client.VertxHttpClient;
 import io.apicurio.rest.client.auth.exception.AuthErrorHandler;
-import io.apicurio.rest.client.auth.request.KeycloakRequestsProvider;
+import io.apicurio.rest.client.auth.request.TokenRequestsProvider;
 import io.apicurio.rest.client.spi.ApicurioHttpClient;
 import io.apicurio.rest.client.spi.ApicurioHttpClientProvider;
 import io.apicurio.rest.client.spi.ApicurioHttpClientServiceLoader;
@@ -36,7 +36,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 /**
  * @author carnalca@redhat.com
  */
-public class KeycloakAuth implements Auth {
+public class OidcAuth implements Auth {
 
     private static final String BEARER = "Bearer ";
     private static final String CLIENT_CREDENTIALS_GRANT = "client_credentials";
@@ -47,26 +47,30 @@ public class KeycloakAuth implements Auth {
 
     private final String serverUrl;
 
-    private final String realm;
     private final String clientId;
     private final String clientSecret;
 
     private String cachedAccessToken;
     private long cachedAccessTokenExpTime;
+    private long cachedAccessTokenExp;
 
     private final ApicurioHttpClient apicurioHttpClient;
 
-    public KeycloakAuth(String serverUrl, String realm, String clientId, String clientSecret) {
+    public OidcAuth(String serverUrl, String clientId, String clientSecret) {
+        if (!serverUrl.endsWith("/")) {
+            serverUrl += "/";
+        }
         this.serverUrl = serverUrl;
-        this.realm = realm;
         this.clientId = clientId;
         this.clientSecret = clientSecret;
         this.apicurioHttpClient = resolveApicurioHttpClient();
     }
 
-    public KeycloakAuth(Vertx vertx, String serverUrl, String realm, String clientId, String clientSecret) {
+    public OidcAuth(Vertx vertx, String serverUrl, String clientId, String clientSecret) {
+        if (!serverUrl.endsWith("/")) {
+            serverUrl += "/";
+        }
         this.serverUrl = serverUrl;
-        this.realm = realm;
         this.clientId = clientId;
         this.clientSecret = clientSecret;
         this.apicurioHttpClient = new VertxHttpClient(vertx, serverUrl, Collections.emptyMap(), null, new AuthErrorHandler());
@@ -88,7 +92,9 @@ public class KeycloakAuth implements Auth {
     @Override
     public void apply(Map<String, String> requestHeaders) {
         if (isAccessTokenRequired()) {
-            this.cachedAccessToken = obtainAccessToken().getToken();
+            final AccessTokenResponse accessTokenResponse = obtainAccessToken();
+            this.cachedAccessToken = accessTokenResponse.getToken();
+            this.cachedAccessTokenExpTime = System.currentTimeMillis() + accessTokenResponse.getExpiresIn();
         }
         requestHeaders.put("Authorization", BEARER + cachedAccessToken);
     }
@@ -101,11 +107,15 @@ public class KeycloakAuth implements Auth {
                     URLEncoder.encode(entry.getValue(), UTF_8))
             ).collect(Collectors.joining("&"));
 
-            return apicurioHttpClient.sendRequest(KeycloakRequestsProvider.obtainAccessToken(paramsEncoded, realm));
+            return apicurioHttpClient.sendRequest(TokenRequestsProvider.obtainAccessToken(paramsEncoded));
 
         } catch (JsonProcessingException e) {
-            throw new IllegalStateException("Error found while trying to request a new token to keycloak");
+            throw new IllegalStateException("Error found while trying to request a new token");
         }
+    }
+
+    public String authenticate() {
+       return obtainAccessToken().getToken();
     }
 
     public String obtainAccessTokenWithBasicCredentials(String username, String password) {
@@ -116,10 +126,10 @@ public class KeycloakAuth implements Auth {
                     URLEncoder.encode(entry.getValue(), UTF_8))
             ).collect(Collectors.joining("&"));
 
-            return apicurioHttpClient.sendRequest(KeycloakRequestsProvider.obtainAccessToken(paramsEncoded, realm)).getToken();
+            return apicurioHttpClient.sendRequest(TokenRequestsProvider.obtainAccessToken(paramsEncoded)).getToken();
 
         } catch (JsonProcessingException e) {
-            throw new IllegalStateException("Error found while trying to request a new token to keycloak");
+            throw new IllegalStateException("Error found while trying to request a new token");
         }
     }
 
@@ -128,8 +138,6 @@ public class KeycloakAuth implements Auth {
     }
 
     private boolean isTokenExpired() {
-        //FIXME implement expiration check
-        return true;
-        //return (cachedAccessTokenExpTime != 0L) && (long) Time.currentTime() > accessTokenParsed.getExp();
+        return (cachedAccessTokenExpTime != 0L) && (long) (int)(System.currentTimeMillis() / 1000L) > cachedAccessTokenExp;
     }
 }

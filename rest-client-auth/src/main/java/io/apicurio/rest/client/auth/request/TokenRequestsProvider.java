@@ -11,16 +11,14 @@ import java.util.Map;
 import static io.apicurio.rest.client.request.Operation.POST;
 import static io.apicurio.rest.client.request.Request.CONTENT_TYPE;
 
-public class KeycloakRequestsProvider {
+public class TokenRequestsProvider {
 
-    private static final String TOKEN_ENDPOINT = "/protocol/openid-connect/token";
-    private static final String TOKEN_URL_FORMAT = "realms/%s" + TOKEN_ENDPOINT;
+    private static final String TOKEN_ENDPOINT = "protocol/openid-connect/token";
 
-    public static Request<AccessTokenResponse> obtainAccessToken(String paramsEncoded, String realm) throws JsonProcessingException {
+    public static Request<AccessTokenResponse> obtainAccessToken(String paramsEncoded) throws JsonProcessingException {
         return new Request.RequestBuilder<AccessTokenResponse>()
                 .operation(POST)
-                .path(TOKEN_URL_FORMAT)
-                .pathParams(Collections.singletonList(realm))
+                .path(TOKEN_ENDPOINT)
                 .data(paramsEncoded)
                 .headers(Map.of(CONTENT_TYPE, "application/x-www-form-urlencoded"))
                 .responseType(new TypeReference<AccessTokenResponse>() {
