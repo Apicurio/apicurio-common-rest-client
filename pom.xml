@@ -59,15 +59,16 @@
         <module>rest-client-util</module>
     </modules>
 
-
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <jackson.version>2.12.4</jackson.version>
         <apache-commons.version>3.12.0</apache-commons.version>
         <vertx.version>3.9.6</vertx.version>
-        <version.maven-gpg-plugin>1.6</version.maven-gpg-plugin>
-        <version.org.sonatype.plugins.nexus-staging-maven-plugin>1.6.8</version.org.sonatype.plugins.nexus-staging-maven-plugin>
+        <version.org.apache.felix.maven-bundle-plugin>5.1.2</version.org.apache.felix.maven-bundle-plugin>
+        <version.maven-javadoc-plugin>3.3.0</version.maven-javadoc-plugin>
+        <version.maven-source-plugin>3.2.1</version.maven-source-plugin>
+        <version.maven-compiler-plugin>3.8.1</version.maven-compiler-plugin>
     </properties>
 
     <dependencyManagement>
@@ -115,6 +116,82 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${version.maven-compiler-plugin}</version>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                    <fork>true</fork>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>${version.maven-source-plugin}</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>${version.maven-javadoc-plugin}</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <source>8</source>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>${version.org.apache.felix.maven-bundle-plugin}</version>
+                <extensions>true</extensions>
+                <executions>
+                    <execution>
+                        <id>versions</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>cleanVersions</goal>
+                        </goals>
+                        <configuration>
+                            <versions>
+                                <apicurio.osgi.version.clean>${project.version}</apicurio.osgi.version.clean>
+                            </versions>
+                        </configuration>
+                    </execution>
+                </executions>
+                <configuration>
+                    <instructions>
+                        <Bundle-SymbolicName>${project.groupId}.${project.artifactId}</Bundle-SymbolicName>
+                        <Import-Package>
+                            com.fasterxml.jackson*;resolution:=optional;version="[2.9,3)"
+                        </Import-Package>
+                        <Export-Package>
+                            io.apicurio.rest.client.*
+                        </Export-Package>
+                    </instructions>
+                    <niceManifest>true</niceManifest>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
     <profiles>
         <profile>
