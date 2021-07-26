@@ -20,6 +20,19 @@
         <url>https://www.redhat.com/</url>
     </organization>
 
+    <developers>
+        <developer>
+            <name>Carles Arnal</name>
+            <id>CarlesArnal</id>
+            <email>carles.arnal@redhat.com</email>
+            <organization>Red Hat</organization>
+            <roles>
+                <role>Developer</role>
+            </roles>
+            <timezone>+1</timezone>
+        </developer>
+    </developers>
+
     <licenses>
         <license>
             <name>Apache License Version 2.0</name>
