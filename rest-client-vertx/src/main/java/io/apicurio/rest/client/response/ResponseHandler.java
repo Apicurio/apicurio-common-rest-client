@@ -10,7 +10,6 @@ import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.ext.web.client.HttpResponse;
 
-import java.io.ByteArrayInputStream;
 import java.util.concurrent.CompletableFuture;
 
 /**
