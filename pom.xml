@@ -13,7 +13,7 @@
     <name>apicurio-common-rest-client</name>
 
     <url>https://www.apicur.io/</url>
-    <description>Open Source API &amp; Schema Registry</description>
+    <description>Common utilities for building rest clients</description>
 
     <organization>
         <name>Red Hat</name>

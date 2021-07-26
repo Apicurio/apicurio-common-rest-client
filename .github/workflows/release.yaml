@@ -51,7 +51,7 @@ jobs:
 
 
 
-      - name: Apicurio Common Registry Client Code Checkout
+      - name: Apicurio Common Client Code Checkout
         run: |
           git init
           git config --global user.name "apicurio-ci"
