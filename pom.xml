@@ -33,6 +33,11 @@
         <url>https://github.com/Apicurio/apicurio-common-rest-client/issues</url>
     </issueManagement>
 
+    <scm>
+        <connection>scm:git:git@github.com:apicurio/apicurio-common-rest-client.git</connection>
+        <developerConnection>scm:git:git@github.com:apicurio/apicurio-common-rest-client.git</developerConnection>
+        <url>scm:git:git@github.com:apicurio/apicurio-common-rest-client.git</url>
+    </scm>
 
     <modules>
         <module>rest-client-jdk</module>
