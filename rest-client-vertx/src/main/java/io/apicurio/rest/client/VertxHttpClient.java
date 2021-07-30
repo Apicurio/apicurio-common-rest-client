@@ -148,7 +148,12 @@ public class VertxHttpClient implements ApicurioHttpClient {
 
         final ResponseHandler<T> responseHandler = new ResponseHandler<>(resultHolder, request.getResponseType(), errorHandler);
 
-        Buffer buffer = Buffer.buffer(IoUtil.toBytes(request.getData()));
+        Buffer buffer;
+        if (request.getData() != null) {
+            buffer = Buffer.buffer(IoUtil.toBytes(request.getData()));
+        } else {
+            buffer = Buffer.buffer(IoUtil.toBytes(request.getDataString()));
+        }
         httpClientRequest.sendBuffer(buffer, responseHandler);
 
         return resultHolder;

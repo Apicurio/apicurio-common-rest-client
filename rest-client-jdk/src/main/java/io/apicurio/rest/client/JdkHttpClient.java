@@ -32,6 +32,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * @author Carles Arnal 'carnalca@redhat.com'
  */
@@ -141,7 +143,10 @@ public class JdkHttpClient implements ApicurioHttpClient {
     @Override
     public <T> T sendRequest(Request<T> request) {
         try {
-            HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
+            requireNonNull(request.getOperation(), "Request operation cannot be null");
+            requireNonNull(request.getResponseType(), "Response type cannot be null");
+
+            final HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
                     .uri(UriUtil.buildURI(endpoint + request.getRequestPath(), request.getQueryParams(), request.getPathParams()));
 
             DEFAULT_HEADERS.forEach(requestBuilder::header);
