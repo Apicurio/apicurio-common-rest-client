@@ -1,5 +1,7 @@
 package io.apicurio.rest.client.auth;
 
+import io.apicurio.rest.client.auth.exception.AuthException;
+import io.apicurio.rest.client.auth.exception.NotAuthorizedException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -35,5 +37,17 @@ public class AuthTest {
         final String authenticate = auth.obtainAccessTokenWithBasicCredentials(testUsername, testPassword);
 
         Assertions.assertNotNull(authenticate);
+    }
+
+    @Test
+    public void basicAuthOidcTestWrondCreds() {
+        OidcAuth auth = createOidcAuth(keycloakTestResource.getAuthServerUrl(), adminClientId, "test1");
+        Assertions.assertThrows(NotAuthorizedException.class, () -> auth.obtainAccessTokenWithBasicCredentials(testUsername, "22222"));
+    }
+
+    @Test
+    public void basicAuthNonExistingClient() {
+        OidcAuth auth = createOidcAuth(keycloakTestResource.getAuthServerUrl(), "NonExistingClient", "test1");
+        Assertions.assertThrows(AuthException.class, () -> auth.obtainAccessTokenWithBasicCredentials(testUsername, testPassword));
     }
 }
