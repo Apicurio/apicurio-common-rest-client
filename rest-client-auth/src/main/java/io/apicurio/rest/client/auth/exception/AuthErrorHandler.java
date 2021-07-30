@@ -14,16 +14,14 @@ public class AuthErrorHandler implements RestClientErrorHandler {
 
     @Override
     public ApicurioRestClientException handleErrorResponse(InputStream body, int statusCode) {
-        if (statusCode == UNAUTHORIZED_CODE) {
-            //authorization error
-            return new NotAuthorizedException(IoUtil.toString(body));
-        } else {
-            if (statusCode == FORBIDDEN_CODE) {
-                //forbidden error
+        switch (statusCode) {
+            case UNAUTHORIZED_CODE:
+                return new NotAuthorizedException(IoUtil.toString(body));
+            case FORBIDDEN_CODE:
                 return new ForbiddenException(IoUtil.toString(body));
-            }
+            default:
+                return new AuthException(IoUtil.toString(body));
         }
-        return null;
     }
 
     @Override
