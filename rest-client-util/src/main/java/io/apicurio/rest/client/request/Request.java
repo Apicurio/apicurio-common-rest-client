@@ -93,7 +93,7 @@ public class Request<T> {
 
     public static class RequestBuilder<T> {
         private Operation operation;
-        private String path;
+        private String path = "";
         private Map<String, String> headers = Collections.emptyMap();
         private Map<String, List<String>> queryParams = Collections.emptyMap();
         private TypeReference<T> typeReference;

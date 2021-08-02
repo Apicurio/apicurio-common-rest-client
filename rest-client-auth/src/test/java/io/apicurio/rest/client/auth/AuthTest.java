@@ -24,11 +24,19 @@ public class AuthTest {
     }
 
     @Test
-    public void oidcAuthTest() {
+    public void oidcAuthTest() throws InterruptedException {
         OidcAuth auth = createOidcAuth(keycloakTestResource.getAuthServerUrl(), adminClientId, "test1");
-        final String authenticate = auth.authenticate();
 
-        Assertions.assertNotNull(authenticate);
+        //Test token is reused
+        String firstToken = auth.authenticate();
+        String secondToken = auth.authenticate();
+        Assertions.assertEquals(firstToken, secondToken);
+
+        //Wait until the token is expired
+        Thread.sleep(9000);
+
+        String thirdToken = auth.authenticate();
+        Assertions.assertNotEquals(firstToken, thirdToken);
     }
 
     @Test
