@@ -13,12 +13,10 @@ import static io.apicurio.rest.client.request.Request.CONTENT_TYPE;
 
 public class TokenRequestsProvider {
 
-    private static final String TOKEN_ENDPOINT = "protocol/openid-connect/token";
-
     public static Request<AccessTokenResponse> obtainAccessToken(String paramsEncoded) throws JsonProcessingException {
         return new Request.RequestBuilder<AccessTokenResponse>()
                 .operation(POST)
-                .path(TOKEN_ENDPOINT)
+                .path("")
                 .data(paramsEncoded)
                 .headers(Map.of(CONTENT_TYPE, "application/x-www-form-urlencoded"))
                 .responseType(new TypeReference<AccessTokenResponse>() {

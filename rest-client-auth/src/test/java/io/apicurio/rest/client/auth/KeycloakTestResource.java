@@ -13,9 +13,10 @@ import java.util.List;
 public class KeycloakTestResource {
 
     private KeycloakContainer container;
+    private static final String TOKEN_ENDPOINT = "protocol/openid-connect/token";
+
     String testUsername = "sr-test-user";
     String testPassword = "sr-test-password";
-
 
     public void start() {
         container = new KeycloakContainer()
@@ -25,7 +26,7 @@ public class KeycloakTestResource {
     }
 
     public String getAuthServerUrl() {
-        return container.getAuthServerUrl() + "/realms/" + "registry" ;
+        return container.getAuthServerUrl() + "/realms/" + "registry/" + TOKEN_ENDPOINT ;
     }
 
     private void createTestUser() {

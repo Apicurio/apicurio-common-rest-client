@@ -45,35 +45,34 @@ public class OidcAuth implements Auth {
 
     private static final ApicurioHttpClientServiceLoader serviceLoader = new ApicurioHttpClientServiceLoader();
 
-    private final String serverUrl;
+    private final String tokenEndpoint;
 
     private final String clientId;
     private final String clientSecret;
 
     private String cachedAccessToken;
-    private long cachedAccessTokenExpTime;
     private long cachedAccessTokenExp;
 
     private final ApicurioHttpClient apicurioHttpClient;
 
-    public OidcAuth(String serverUrl, String clientId, String clientSecret) {
-        if (!serverUrl.endsWith("/")) {
-            serverUrl += "/";
+    public OidcAuth(String tokenEndpoint, String clientId, String clientSecret) {
+        if (!tokenEndpoint.endsWith("/")) {
+            tokenEndpoint += "/";
         }
-        this.serverUrl = serverUrl;
+        this.tokenEndpoint = tokenEndpoint;
         this.clientId = clientId;
         this.clientSecret = clientSecret;
         this.apicurioHttpClient = resolveApicurioHttpClient();
     }
 
-    public OidcAuth(Vertx vertx, String serverUrl, String clientId, String clientSecret) {
-        if (!serverUrl.endsWith("/")) {
-            serverUrl += "/";
+    public OidcAuth(Vertx vertx, String tokenEndpoint, String clientId, String clientSecret) {
+        if (!tokenEndpoint.endsWith("/")) {
+            tokenEndpoint += "/";
         }
-        this.serverUrl = serverUrl;
+        this.tokenEndpoint = tokenEndpoint;
         this.clientId = clientId;
         this.clientSecret = clientSecret;
-        this.apicurioHttpClient = new VertxHttpClient(vertx, serverUrl, Collections.emptyMap(), null, new AuthErrorHandler());
+        this.apicurioHttpClient = new VertxHttpClient(vertx, tokenEndpoint, Collections.emptyMap(), null, new AuthErrorHandler());
     }
 
     private static ApicurioHttpClientProvider resolveProviderInstance() {
@@ -83,7 +82,7 @@ public class OidcAuth implements Auth {
     }
 
     private ApicurioHttpClient resolveApicurioHttpClient() {
-        return resolveProviderInstance().create(serverUrl, Collections.emptyMap(), null, new AuthErrorHandler());
+        return resolveProviderInstance().create(tokenEndpoint, Collections.emptyMap(), null, new AuthErrorHandler());
     }
 
     /**
@@ -92,22 +91,21 @@ public class OidcAuth implements Auth {
     @Override
     public void apply(Map<String, String> requestHeaders) {
         if (isAccessTokenRequired()) {
-            final AccessTokenResponse accessTokenResponse = obtainAccessToken();
-            this.cachedAccessToken = accessTokenResponse.getToken();
-            this.cachedAccessTokenExpTime = System.currentTimeMillis() + accessTokenResponse.getExpiresIn();
+            requestAccessToken();
         }
         requestHeaders.put("Authorization", BEARER + cachedAccessToken);
     }
 
-    private AccessTokenResponse obtainAccessToken() {
+    private void requestAccessToken() {
         try {
             final Map<String, String> params = Map.of("grant_type", CLIENT_CREDENTIALS_GRANT, "client_id", clientId, "client_secret", clientSecret);
             final String paramsEncoded = params.entrySet().stream().map(entry -> String.join("=",
                     URLEncoder.encode(entry.getKey(), UTF_8),
                     URLEncoder.encode(entry.getValue(), UTF_8))
             ).collect(Collectors.joining("&"));
-
-            return apicurioHttpClient.sendRequest(TokenRequestsProvider.obtainAccessToken(paramsEncoded));
+            final AccessTokenResponse accessTokenResponse = apicurioHttpClient.sendRequest(TokenRequestsProvider.obtainAccessToken(paramsEncoded));
+            this.cachedAccessToken = accessTokenResponse.getToken();
+            this.cachedAccessTokenExp = System.currentTimeMillis() / 1000 + accessTokenResponse.getExpiresIn();
 
         } catch (JsonProcessingException e) {
             throw new IllegalStateException("Error found while trying to request a new token");
@@ -115,7 +113,10 @@ public class OidcAuth implements Auth {
     }
 
     public String authenticate() {
-       return obtainAccessToken().getToken();
+        if (isAccessTokenRequired()) {
+            requestAccessToken();
+        }
+        return cachedAccessToken;
     }
 
     public String obtainAccessTokenWithBasicCredentials(String username, String password) {
@@ -138,6 +139,6 @@ public class OidcAuth implements Auth {
     }
 
     private boolean isTokenExpired() {
-        return (cachedAccessTokenExpTime != 0L) && (long) (int)(System.currentTimeMillis() / 1000L) > cachedAccessTokenExp;
+        return (long) (int)(System.currentTimeMillis() / 1000L) > cachedAccessTokenExp;
     }
 }
