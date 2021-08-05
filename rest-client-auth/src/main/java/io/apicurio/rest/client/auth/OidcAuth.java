@@ -17,6 +17,8 @@
 package io.apicurio.rest.client.auth;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+
+import io.apicurio.rest.client.JdkHttpClient;
 import io.apicurio.rest.client.VertxHttpClient;
 import io.apicurio.rest.client.auth.exception.AuthErrorHandler;
 import io.apicurio.rest.client.auth.request.TokenRequestsProvider;
@@ -73,6 +75,16 @@ public class OidcAuth implements Auth {
         this.clientId = clientId;
         this.clientSecret = clientSecret;
         this.apicurioHttpClient = new VertxHttpClient(vertx, tokenEndpoint, Collections.emptyMap(), null, new AuthErrorHandler());
+    }
+
+    public OidcAuth(ApicurioHttpClientProvider httpClientProvider, String tokenEndpoint, String clientId, String clientSecret) {
+        if (!tokenEndpoint.endsWith("/")) {
+            tokenEndpoint += "/";
+        }
+        this.tokenEndpoint = tokenEndpoint;
+        this.clientId = clientId;
+        this.clientSecret = clientSecret;
+        this.apicurioHttpClient = httpClientProvider.create(tokenEndpoint, Collections.emptyMap(), null, new AuthErrorHandler());
     }
 
     private static ApicurioHttpClientProvider resolveProviderInstance() {
