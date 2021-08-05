@@ -5,7 +5,7 @@
     <parent>
         <artifactId>apicurio-common-rest-client</artifactId>
         <groupId>io.apicurio</groupId>
-        <version>0.0.5.Final</version>
+        <version>0.0.6-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
