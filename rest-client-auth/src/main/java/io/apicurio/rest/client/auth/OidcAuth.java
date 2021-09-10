@@ -17,11 +17,10 @@
 package io.apicurio.rest.client.auth;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-
-import io.apicurio.rest.client.JdkHttpClient;
 import io.apicurio.rest.client.VertxHttpClient;
 import io.apicurio.rest.client.auth.exception.AuthErrorHandler;
 import io.apicurio.rest.client.auth.request.TokenRequestsProvider;
+import io.apicurio.rest.client.error.RestClientErrorHandler;
 import io.apicurio.rest.client.spi.ApicurioHttpClient;
 import io.apicurio.rest.client.spi.ApicurioHttpClientProvider;
 import io.apicurio.rest.client.spi.ApicurioHttpClientServiceLoader;
@@ -30,6 +29,7 @@ import io.vertx.core.Vertx;
 import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -57,34 +57,34 @@ public class OidcAuth implements Auth {
 
     private final ApicurioHttpClient apicurioHttpClient;
 
-    public OidcAuth(String tokenEndpoint, String clientId, String clientSecret) {
+    public OidcAuth(String tokenEndpoint, String clientId, String clientSecret, Optional<RestClientErrorHandler> optionalErrorHandler) {
         if (!tokenEndpoint.endsWith("/")) {
             tokenEndpoint += "/";
         }
         this.tokenEndpoint = tokenEndpoint;
         this.clientId = clientId;
         this.clientSecret = clientSecret;
-        this.apicurioHttpClient = resolveApicurioHttpClient();
+        this.apicurioHttpClient = resolveApicurioHttpClient(optionalErrorHandler.orElse(new AuthErrorHandler()));
     }
 
-    public OidcAuth(Vertx vertx, String tokenEndpoint, String clientId, String clientSecret) {
+    public OidcAuth(Vertx vertx, String tokenEndpoint, String clientId, String clientSecret, Optional<RestClientErrorHandler> optionalErrorHandler) {
         if (!tokenEndpoint.endsWith("/")) {
             tokenEndpoint += "/";
         }
         this.tokenEndpoint = tokenEndpoint;
         this.clientId = clientId;
         this.clientSecret = clientSecret;
-        this.apicurioHttpClient = new VertxHttpClient(vertx, tokenEndpoint, Collections.emptyMap(), null, new AuthErrorHandler());
+        this.apicurioHttpClient = new VertxHttpClient(vertx, tokenEndpoint, Collections.emptyMap(), null, optionalErrorHandler.orElse(new AuthErrorHandler()));
     }
 
-    public OidcAuth(ApicurioHttpClientProvider httpClientProvider, String tokenEndpoint, String clientId, String clientSecret) {
+    public OidcAuth(ApicurioHttpClientProvider httpClientProvider, String tokenEndpoint, String clientId, String clientSecret, Optional<RestClientErrorHandler> optionalErrorHandler) {
         if (!tokenEndpoint.endsWith("/")) {
             tokenEndpoint += "/";
         }
         this.tokenEndpoint = tokenEndpoint;
         this.clientId = clientId;
         this.clientSecret = clientSecret;
-        this.apicurioHttpClient = httpClientProvider.create(tokenEndpoint, Collections.emptyMap(), null, new AuthErrorHandler());
+        this.apicurioHttpClient = httpClientProvider.create(tokenEndpoint, Collections.emptyMap(), null, optionalErrorHandler.orElse(new AuthErrorHandler()));
     }
 
     private static ApicurioHttpClientProvider resolveProviderInstance() {
@@ -93,8 +93,8 @@ public class OidcAuth implements Auth {
                 .next();
     }
 
-    private ApicurioHttpClient resolveApicurioHttpClient() {
-        return resolveProviderInstance().create(tokenEndpoint, Collections.emptyMap(), null, new AuthErrorHandler());
+    private ApicurioHttpClient resolveApicurioHttpClient(RestClientErrorHandler errorHandler) {
+        return resolveProviderInstance().create(tokenEndpoint, Collections.emptyMap(), null, errorHandler);
     }
 
     /**
