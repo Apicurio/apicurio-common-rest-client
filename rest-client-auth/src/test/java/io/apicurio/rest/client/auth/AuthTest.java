@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 public class AuthTest {
 
     private static final KeycloakTestResource keycloakTestResource = new KeycloakTestResource();
@@ -15,7 +17,7 @@ public class AuthTest {
     String testPassword = "sr-test-password";
 
     public OidcAuth createOidcAuth(String authServerUrl, String adminClientId, String test1) {
-        return new OidcAuth(authServerUrl, adminClientId, "test1");
+        return new OidcAuth(authServerUrl, adminClientId, "test1", Optional.empty());
     }
 
     @BeforeAll
