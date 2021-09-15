@@ -70,7 +70,7 @@
         <version.maven-source-plugin>3.2.1</version.maven-source-plugin>
         <version.maven-compiler-plugin>3.8.1</version.maven-compiler-plugin>
         <junit.version>5.8.0</junit.version>
-        <wiremock.version>2.29.1</wiremock.version>
+        <wiremock.version>2.31.0</wiremock.version>
         <keycloak.testcontainers.version>1.7.1</keycloak.testcontainers.version>
         <keycloak-admin-client.version>15.0.0</keycloak-admin-client.version>
         <surefire-plugin.version>2.22.2</surefire-plugin.version>
