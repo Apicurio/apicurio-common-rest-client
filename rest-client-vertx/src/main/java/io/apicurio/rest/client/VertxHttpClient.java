@@ -168,4 +168,9 @@ public class VertxHttpClient implements ApicurioHttpClient {
     public Map<String, String> getHeaders() {
         return requestHeaders.get();
     }
+
+    @Override
+    public void close() {
+        webClient.close();
+    }
 }

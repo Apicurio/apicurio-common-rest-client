@@ -30,6 +30,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
@@ -39,10 +41,11 @@ import static java.util.Objects.requireNonNull;
  */
 public class JdkHttpClient implements ApicurioHttpClient {
 
-    private final HttpClient client;
+    private HttpClient client;
     private final String endpoint;
     private final Auth auth;
     private final RestClientErrorHandler errorHandler;
+    private final ExecutorService executor;
 
     private static final Map<String, String> DEFAULT_HEADERS = new HashMap<>();
     private static final ThreadLocal<Map<String, String>> requestHeaders = ThreadLocal.withInitial(Collections::emptyMap);
@@ -61,7 +64,8 @@ public class JdkHttpClient implements ApicurioHttpClient {
         final HttpClient.Builder httpClientBuilder = handleConfiguration(configs);
         this.endpoint = endpoint;
         this.auth = auth;
-        this.client = httpClientBuilder.build();
+        this.executor = Executors.newFixedThreadPool(5);
+        this.client = httpClientBuilder.executor(executor).build();
         this.errorHandler = errorHandler;
     }
 
@@ -214,5 +218,13 @@ public class JdkHttpClient implements ApicurioHttpClient {
             return Boolean.parseBoolean((String) parameter);
         }
         return false;
+    }
+
+    @Override
+    public void close() {
+        if (!executor.isShutdown() && !executor.isTerminated()) {
+            executor.shutdown();
+        }
+        client = null;
     }
 }

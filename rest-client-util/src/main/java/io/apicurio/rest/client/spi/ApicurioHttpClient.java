@@ -41,4 +41,9 @@ public interface ApicurioHttpClient {
      * @return The current map with the request headers
      */
     Map<String, String> getHeaders();
+
+    /**
+     *  close the underlying http client
+     */
+    void close();
 }
