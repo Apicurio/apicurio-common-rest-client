@@ -1,24 +1,24 @@
 package io.apicurio.rest.client.auth;
 
+import io.apicurio.rest.client.VertxHttpClientProvider;
 import io.apicurio.rest.client.auth.exception.AuthException;
 import io.apicurio.rest.client.auth.exception.NotAuthorizedException;
+import io.apicurio.rest.client.spi.ApicurioHttpClientProvider;
+import io.vertx.core.Vertx;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-public class AuthTest {
+public class VertxAuthTest {
 
     private static final KeycloakTestResource keycloakTestResource = new KeycloakTestResource();
 
     String adminClientId = "registry-api";
     String testUsername = "sr-test-user";
     String testPassword = "sr-test-password";
-
-    public OidcAuth createOidcAuth(String authServerUrl, String adminClientId, String test1) {
-        return new OidcAuth(authServerUrl, adminClientId, "test1", Optional.empty());
-    }
 
     @BeforeAll
     public static void init() {
@@ -59,5 +59,15 @@ public class AuthTest {
     public void basicAuthNonExistingClient() {
         OidcAuth auth = createOidcAuth(keycloakTestResource.getAuthServerUrl(), "NonExistingClient", "test1");
         Assertions.assertThrows(AuthException.class, () -> auth.obtainAccessTokenWithBasicCredentials(testUsername, testPassword));
+    }
+
+    @AfterAll
+    public static void close() {
+        keycloakTestResource.stop();
+    }
+
+    private OidcAuth createOidcAuth(String authServerUrl, String adminClientId, String test1) {
+        final ApicurioHttpClientProvider provider = new VertxHttpClientProvider(Vertx.vertx());
+        return new OidcAuth(provider, authServerUrl, adminClientId, test1, Optional.empty());
     }
 }

@@ -14,7 +14,7 @@
     <dependencies>
         <dependency>
             <groupId>io.apicurio</groupId>
-            <artifactId>apicurio-common-rest-client-util</artifactId>
+            <artifactId>apicurio-common-rest-client-common</artifactId>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -28,6 +28,16 @@
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
             <artifactId>wiremock-jre8</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.dasniko</groupId>
+            <artifactId>testcontainers-keycloak</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-admin-client</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

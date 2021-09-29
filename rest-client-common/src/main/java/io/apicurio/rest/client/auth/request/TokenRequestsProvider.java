@@ -5,7 +5,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import io.apicurio.rest.client.auth.AccessTokenResponse;
 import io.apicurio.rest.client.request.Request;
 
-import java.util.Collections;
 import java.util.Map;
 
 import static io.apicurio.rest.client.request.Operation.POST;

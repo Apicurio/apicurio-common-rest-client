@@ -55,8 +55,7 @@
     <modules>
         <module>rest-client-jdk</module>
         <module>rest-client-vertx</module>
-        <module>rest-client-auth</module>
-        <module>rest-client-util</module>
+        <module>rest-client-common</module>
     </modules>
 
     <properties>
@@ -102,7 +101,7 @@
 
             <dependency>
                 <groupId>io.apicurio</groupId>
-                <artifactId>apicurio-common-rest-client-util</artifactId>
+                <artifactId>apicurio-common-rest-client-common</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -113,11 +112,6 @@
             <dependency>
                 <groupId>io.apicurio</groupId>
                 <artifactId>apicurio-common-rest-client-vertx</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.apicurio</groupId>
-                <artifactId>apicurio-common-rest-client-auth</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
