@@ -10,6 +10,7 @@ import io.apicurio.rest.client.util.ConcurrentUtil;
 import io.apicurio.rest.client.util.IoUtil;
 import io.apicurio.rest.client.util.UriUtil;
 import io.vertx.core.Context;
+import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
@@ -49,14 +50,13 @@ public class VertxHttpClient implements ApicurioHttpClient {
     }
 
     private static void processConfiguration(Map<String, Object> configs) {
-
         Map<String, String> requestHeaders = configs.entrySet().stream()
                 .filter(map -> map.getKey().startsWith(ApicurioClientConfig.APICURIO_REQUEST_HEADERS_PREFIX))
                 .collect(Collectors.toMap(map -> map.getKey()
                         .replace(ApicurioClientConfig.APICURIO_REQUEST_HEADERS_PREFIX, ""), map -> map.getValue().toString()));
 
         if (!requestHeaders.isEmpty()) {
-            requestHeaders.forEach(DEFAULT_HEADERS::put);
+            DEFAULT_HEADERS.putAll(requestHeaders);
         }
     }
 
@@ -71,7 +71,7 @@ public class VertxHttpClient implements ApicurioHttpClient {
 
         requestOptions.setHost(uri.getHost());
         requestOptions.setURI(uri.getPath());
-        requestOptions.setPort(uri.getPort());
+        requestOptions.setAbsoluteURI(uri.toString());
 
         DEFAULT_HEADERS.forEach(requestOptions::addHeader);
 
@@ -89,18 +89,20 @@ public class VertxHttpClient implements ApicurioHttpClient {
 
         CompletableFuture<T> resultHolder;
 
+        final String uriString = uri.toString();
+
         switch (request.getOperation()) {
             case GET:
-                resultHolder = executeGet(request, requestOptions);
+                resultHolder = executeGet(request, requestOptions.getHeaders(), uriString);
                 break;
             case PUT:
-                resultHolder = executePut(request, requestOptions);
+                resultHolder = executePut(request, requestOptions.getHeaders(), uriString);
                 break;
             case POST:
-                resultHolder = executePost(request, requestOptions);
+                resultHolder = executePost(request, requestOptions.getHeaders(), uriString);
                 break;
             case DELETE:
-                resultHolder = executeDelete(request, requestOptions);
+                resultHolder = executeDelete(request, requestOptions.getHeaders(), uriString);
                 break;
             default:
                 throw new IllegalStateException("Operation not allowed");
@@ -109,24 +111,25 @@ public class VertxHttpClient implements ApicurioHttpClient {
         return ConcurrentUtil.result(resultHolder);
     }
 
-    private <T> CompletableFuture<T> executeGet(Request<T> request, RequestOptions requestOptions) {
-        return sendRequestWithoutPayload(HttpMethod.GET, request, requestOptions);
+    private <T> CompletableFuture<T> executeGet(Request<T> request, MultiMap requestHeaders, String absoluteUri) {
+        return sendRequestWithoutPayload(HttpMethod.GET, request, requestHeaders, absoluteUri);
     }
 
-    private <T> CompletableFuture<T> executeDelete(Request<T> request, RequestOptions requestOptions) {
-        return sendRequestWithoutPayload(HttpMethod.DELETE, request, requestOptions);
+    private <T> CompletableFuture<T> executeDelete(Request<T> request, MultiMap requestHeaders, String absoluteUri) {
+        return sendRequestWithoutPayload(HttpMethod.DELETE, request, requestHeaders, absoluteUri);
     }
 
-    private <T> CompletableFuture<T> executePost(Request<T> request, RequestOptions requestOptions) {
-        return sendRequestWithPayload(HttpMethod.POST, request, requestOptions);
+    private <T> CompletableFuture<T> executePost(Request<T> request, MultiMap requestHeaders, String absoluteUri) {
+        return sendRequestWithPayload(HttpMethod.POST, request, requestHeaders, absoluteUri);
     }
 
-    private <T> CompletableFuture<T> executePut(Request<T> request, RequestOptions requestOptions) {
-        return sendRequestWithPayload(HttpMethod.PUT, request, requestOptions);
+    private <T> CompletableFuture<T> executePut(Request<T> request, MultiMap requestHeaders, String absoluteUri) {
+        return sendRequestWithPayload(HttpMethod.PUT, request, requestHeaders, absoluteUri);
     }
 
-    private <T> CompletableFuture<T> sendRequestWithoutPayload(HttpMethod httpMethod, Request<T> request, RequestOptions requestOptions) {
-        final HttpRequest<Buffer> httpClientRequest = webClient.request(httpMethod, requestOptions);
+    private <T> CompletableFuture<T> sendRequestWithoutPayload(HttpMethod httpMethod, Request<T> request, MultiMap requestHeaders, String absoluteUri) {
+        final HttpRequest<Buffer> httpClientRequest = webClient.requestAbs(httpMethod, absoluteUri);
+        httpClientRequest.putHeaders(requestHeaders);
 
         //Iterate over query params list so we can add multiple query params with the same key
         request.getQueryParams().forEach((key, paramList) -> paramList
@@ -138,8 +141,9 @@ public class VertxHttpClient implements ApicurioHttpClient {
         return resultHolder;
     }
 
-    private <T> CompletableFuture<T> sendRequestWithPayload(HttpMethod httpMethod, Request<T> request, RequestOptions requestOptions) {
-        final HttpRequest<Buffer> httpClientRequest = webClient.request(httpMethod, requestOptions);
+    private <T> CompletableFuture<T> sendRequestWithPayload(HttpMethod httpMethod, Request<T> request, MultiMap requestHeaders, String absoluteUri) {
+        final HttpRequest<Buffer> httpClientRequest = webClient.requestAbs(httpMethod, absoluteUri);
+        httpClientRequest.putHeaders(requestHeaders);
         final CompletableFuture<T> resultHolder = new CompletableFuture<T>();
 
         //Iterate over query params list so we can add multiple query params with the same key

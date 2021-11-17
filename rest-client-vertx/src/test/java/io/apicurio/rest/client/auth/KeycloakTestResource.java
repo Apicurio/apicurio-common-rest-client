@@ -26,7 +26,7 @@ public class KeycloakTestResource {
     }
 
     public String getAuthServerUrl() {
-        return container.getAuthServerUrl() + "/realms/" + "registry/" + TOKEN_ENDPOINT ;
+        return container.getAuthServerUrl() + "/realms/" + "registry/" + TOKEN_ENDPOINT;
     }
 
     private void createTestUser() {
