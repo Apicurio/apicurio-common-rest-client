@@ -28,6 +28,7 @@ import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -44,6 +45,7 @@ public class OidcAuth implements Auth {
 
 
     private static final ApicurioHttpClientServiceLoader serviceLoader = new ApicurioHttpClientServiceLoader();
+    private static final AtomicReference<ApicurioHttpClientProvider> providerReference = new AtomicReference<>();
 
     private final String tokenEndpoint;
 
@@ -82,7 +84,16 @@ public class OidcAuth implements Auth {
     }
 
     private ApicurioHttpClient resolveApicurioHttpClient(RestClientErrorHandler errorHandler) {
-        return resolveProviderInstance().create(tokenEndpoint, Collections.emptyMap(), null, errorHandler);
+        ApicurioHttpClientProvider p = providerReference.get();
+        if (p == null) {
+            providerReference.compareAndSet(null, resolveProviderInstance());
+            p = providerReference.get();
+        }
+        return p.create(tokenEndpoint, Collections.emptyMap(), null, errorHandler);
+    }
+
+    public static boolean setProvider(ApicurioHttpClientProvider provider) {
+        return providerReference.compareAndSet(null, provider);
     }
 
     /**
