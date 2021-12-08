@@ -150,6 +150,10 @@ public class OidcAuth implements Auth {
     }
 
     private boolean isTokenExpired() {
-        return (long) (int)(System.currentTimeMillis() / 1000L) > cachedAccessTokenExp;
+        return (int)(System.currentTimeMillis() / 1000L) > cachedAccessTokenExp;
+    }
+
+    public void close() {
+        this.apicurioHttpClient.close();
     }
 }
