@@ -23,7 +23,7 @@ import java.util.Map;
 /**
  * Common interface for http client implementations
  */
-public interface ApicurioHttpClient {
+public interface ApicurioHttpClient extends AutoCloseable {
 
     /**
      * @param request The request to be executed
@@ -45,5 +45,6 @@ public interface ApicurioHttpClient {
     /**
      *  close the underlying http client
      */
+    @Override
     void close();
 }
