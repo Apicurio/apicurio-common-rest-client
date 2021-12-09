@@ -37,7 +37,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 /**
  * @author carnalca@redhat.com
  */
-public class OidcAuth implements Auth {
+public class OidcAuth implements Auth, AutoCloseable {
 
     private static final String BEARER = "Bearer ";
     private static final String CLIENT_CREDENTIALS_GRANT = "client_credentials";
@@ -153,6 +153,7 @@ public class OidcAuth implements Auth {
         return (int)(System.currentTimeMillis() / 1000L) > cachedAccessTokenExp;
     }
 
+    @Override
     public void close() {
         this.apicurioHttpClient.close();
     }
