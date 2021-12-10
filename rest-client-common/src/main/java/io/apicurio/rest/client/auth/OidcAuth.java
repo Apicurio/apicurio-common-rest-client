@@ -17,18 +17,11 @@
 package io.apicurio.rest.client.auth;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import io.apicurio.rest.client.auth.exception.AuthErrorHandler;
 import io.apicurio.rest.client.auth.request.TokenRequestsProvider;
-import io.apicurio.rest.client.error.RestClientErrorHandler;
 import io.apicurio.rest.client.spi.ApicurioHttpClient;
-import io.apicurio.rest.client.spi.ApicurioHttpClientProvider;
-import io.apicurio.rest.client.spi.ApicurioHttpClientServiceLoader;
 
 import java.net.URLEncoder;
-import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -43,12 +36,6 @@ public class OidcAuth implements Auth, AutoCloseable {
     private static final String CLIENT_CREDENTIALS_GRANT = "client_credentials";
     private static final String PASSWORD_GRANT = "password";
 
-
-    private static final ApicurioHttpClientServiceLoader serviceLoader = new ApicurioHttpClientServiceLoader();
-    private static final AtomicReference<ApicurioHttpClientProvider> providerReference = new AtomicReference<>();
-
-    private final String tokenEndpoint;
-
     private final String clientId;
     private final String clientSecret;
 
@@ -57,43 +44,10 @@ public class OidcAuth implements Auth, AutoCloseable {
 
     private final ApicurioHttpClient apicurioHttpClient;
 
-    public OidcAuth(String tokenEndpoint, String clientId, String clientSecret, Optional<RestClientErrorHandler> optionalErrorHandler) {
-        if (!tokenEndpoint.endsWith("/")) {
-            tokenEndpoint += "/";
-        }
-        this.tokenEndpoint = tokenEndpoint;
+    public OidcAuth(ApicurioHttpClient httpClient, String clientId, String clientSecret) {
         this.clientId = clientId;
         this.clientSecret = clientSecret;
-        this.apicurioHttpClient = resolveApicurioHttpClient(optionalErrorHandler.orElse(new AuthErrorHandler()));
-    }
-
-    public OidcAuth(ApicurioHttpClientProvider httpClientProvider, String tokenEndpoint, String clientId, String clientSecret, Optional<RestClientErrorHandler> optionalErrorHandler) {
-        if (!tokenEndpoint.endsWith("/")) {
-            tokenEndpoint += "/";
-        }
-        this.tokenEndpoint = tokenEndpoint;
-        this.clientId = clientId;
-        this.clientSecret = clientSecret;
-        this.apicurioHttpClient = httpClientProvider.create(tokenEndpoint, Collections.emptyMap(), null, optionalErrorHandler.orElse(new AuthErrorHandler()));
-    }
-
-    private static ApicurioHttpClientProvider resolveProviderInstance() {
-        //We get first provider available
-        return serviceLoader.providers(true)
-                .next();
-    }
-
-    private ApicurioHttpClient resolveApicurioHttpClient(RestClientErrorHandler errorHandler) {
-        ApicurioHttpClientProvider p = providerReference.get();
-        if (p == null) {
-            providerReference.compareAndSet(null, resolveProviderInstance());
-            p = providerReference.get();
-        }
-        return p.create(tokenEndpoint, Collections.emptyMap(), null, errorHandler);
-    }
-
-    public static boolean setProvider(ApicurioHttpClientProvider provider) {
-        return providerReference.compareAndSet(null, provider);
+        this.apicurioHttpClient = httpClient;
     }
 
     /**
@@ -130,7 +84,7 @@ public class OidcAuth implements Auth, AutoCloseable {
         return cachedAccessToken;
     }
 
-    public String obtainAccessTokenWithBasicCredentials(String username, String password) {
+    public String obtainAccessTokenPaswordGrant(String username, String password) {
         try {
             final Map<String, String> params = Map.of("grant_type", PASSWORD_GRANT, "client_id", clientId, "client_secret", clientSecret, "username", username, "password", password);
             final String paramsEncoded = params.entrySet().stream().map(entry -> String.join("=",
@@ -150,7 +104,7 @@ public class OidcAuth implements Auth, AutoCloseable {
     }
 
     private boolean isTokenExpired() {
-        return (int)(System.currentTimeMillis() / 1000L) > cachedAccessTokenExp;
+        return (int) (System.currentTimeMillis() / 1000L) > cachedAccessTokenExp;
     }
 
     @Override

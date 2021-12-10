@@ -1,12 +1,16 @@
 package io.apicurio.rest.client.auth;
 
+import io.apicurio.rest.client.auth.exception.AuthErrorHandler;
 import io.apicurio.rest.client.auth.exception.AuthException;
 import io.apicurio.rest.client.auth.exception.NotAuthorizedException;
+import io.apicurio.rest.client.spi.ApicurioHttpClient;
+import io.apicurio.rest.client.spi.ApicurioHttpClientFactory;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
 import java.util.Optional;
 
 public class AuthTest {
@@ -17,13 +21,17 @@ public class AuthTest {
     String testUsername = "sr-test-user";
     String testPassword = "sr-test-password";
 
+    private static ApicurioHttpClient httpClient;
+
     private OidcAuth createOidcAuth(String authServerUrl, String adminClientId, String test1) {
-        return new OidcAuth(authServerUrl, adminClientId, "test1", Optional.empty());
+        return new OidcAuth(httpClient, adminClientId, "test1");
     }
 
     @BeforeAll
     public static void init() {
         keycloakTestResource.start();
+        httpClient = ApicurioHttpClientFactory.create(keycloakTestResource.getAuthServerUrl(), Collections.emptyMap(), null, new AuthErrorHandler());
+
     }
 
     @Test
@@ -45,7 +53,7 @@ public class AuthTest {
     @Test
     public void basicAuthOidcTest() {
         OidcAuth auth = createOidcAuth(keycloakTestResource.getAuthServerUrl(), adminClientId, "test1");
-        final String authenticate = auth.obtainAccessTokenWithBasicCredentials(testUsername, testPassword);
+        final String authenticate = auth.obtainAccessTokenPaswordGrant(testUsername, testPassword);
 
         Assertions.assertNotNull(authenticate);
     }
@@ -53,13 +61,13 @@ public class AuthTest {
     @Test
     public void basicAuthOidcTestWrondCreds() {
         OidcAuth auth = createOidcAuth(keycloakTestResource.getAuthServerUrl(), adminClientId, "test1");
-        Assertions.assertThrows(NotAuthorizedException.class, () -> auth.obtainAccessTokenWithBasicCredentials(testUsername, "22222"));
+        Assertions.assertThrows(NotAuthorizedException.class, () -> auth.obtainAccessTokenPaswordGrant(testUsername, "22222"));
     }
 
     @Test
     public void basicAuthNonExistingClient() {
         OidcAuth auth = createOidcAuth(keycloakTestResource.getAuthServerUrl(), "NonExistingClient", "test1");
-        Assertions.assertThrows(AuthException.class, () -> auth.obtainAccessTokenWithBasicCredentials(testUsername, testPassword));
+        Assertions.assertThrows(AuthException.class, () -> auth.obtainAccessTokenPaswordGrant(testUsername, testPassword));
     }
 
     @AfterAll
