@@ -1,20 +1,8 @@
 package io.apicurio.rest.client;
 
 
-import io.apicurio.rest.client.auth.Auth;
-import io.apicurio.rest.client.config.ApicurioClientConfig;
-import io.apicurio.rest.client.error.RestClientErrorHandler;
-import io.apicurio.rest.client.handler.BodyHandler;
-import io.apicurio.rest.client.request.Request;
-import io.apicurio.rest.client.spi.ApicurioHttpClient;
-import io.apicurio.rest.client.util.UriUtil;
+import static java.util.Objects.requireNonNull;
 
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.http.HttpClient;
@@ -30,12 +18,22 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
-import static java.util.Objects.requireNonNull;
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
+
+import io.apicurio.rest.client.auth.Auth;
+import io.apicurio.rest.client.config.ApicurioClientConfig;
+import io.apicurio.rest.client.error.RestClientErrorHandler;
+import io.apicurio.rest.client.handler.BodyHandler;
+import io.apicurio.rest.client.request.Request;
+import io.apicurio.rest.client.spi.ApicurioHttpClient;
+import io.apicurio.rest.client.util.UriUtil;
 
 /**
  * @author Carles Arnal 'carnalca@redhat.com'

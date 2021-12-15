@@ -18,6 +18,7 @@ public class KeycloakTestResource {
     String testUsername = "sr-test-user";
     String testPassword = "sr-test-password";
 
+    @SuppressWarnings("resource")
     public void start() {
         container = new KeycloakContainer()
                 .withRealmImportFile("test-realm.json");
