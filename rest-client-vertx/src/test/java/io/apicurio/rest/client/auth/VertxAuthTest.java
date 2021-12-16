@@ -50,7 +50,7 @@ public class VertxAuthTest {
     @Test
     public void basicAuthOidcTest() {
         OidcAuth auth = createOidcAuth(adminClientId, "test1");
-        final String authenticate = auth.obtainAccessTokenPaswordGrant(testUsername, testPassword);
+        final String authenticate = auth.obtainAccessTokenPasswordGrant(testUsername, testPassword);
 
         Assertions.assertNotNull(authenticate);
     }
@@ -58,13 +58,13 @@ public class VertxAuthTest {
     @Test
     public void basicAuthOidcTestWrondCreds() {
         OidcAuth auth = createOidcAuth(adminClientId, "test1");
-        Assertions.assertThrows(NotAuthorizedException.class, () -> auth.obtainAccessTokenPaswordGrant(testUsername, "22222"));
+        Assertions.assertThrows(NotAuthorizedException.class, () -> auth.obtainAccessTokenPasswordGrant(testUsername, "22222"));
     }
 
     @Test
     public void basicAuthNonExistingClient() {
         OidcAuth auth = createOidcAuth("NonExistingClient", "test1");
-        Assertions.assertThrows(AuthException.class, () -> auth.obtainAccessTokenPaswordGrant(testUsername, testPassword));
+        Assertions.assertThrows(AuthException.class, () -> auth.obtainAccessTokenPasswordGrant(testUsername, testPassword));
     }
 
     @AfterAll

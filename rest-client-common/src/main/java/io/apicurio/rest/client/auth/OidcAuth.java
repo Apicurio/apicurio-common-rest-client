@@ -84,7 +84,7 @@ public class OidcAuth implements Auth, AutoCloseable {
         return cachedAccessToken;
     }
 
-    public String obtainAccessTokenPaswordGrant(String username, String password) {
+    public String obtainAccessTokenPasswordGrant(String username, String password) {
         try {
             final Map<String, String> params = Map.of("grant_type", PASSWORD_GRANT, "client_id", clientId, "client_secret", clientSecret, "username", username, "password", password);
             final String paramsEncoded = params.entrySet().stream().map(entry -> String.join("=",
