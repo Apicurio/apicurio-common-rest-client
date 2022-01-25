@@ -55,6 +55,7 @@ public class VertxHttpClient implements ApicurioHttpClient {
         WebClientOptions options = new WebClientOptions();
         if (config.containsKey(ApicurioClientConfig.APICURIO_REQUEST_CA_BUNDLE_LOCATION)) {
             options.setPemTrustOptions(new PemTrustOptions().addCertPath((String)config.get(ApicurioClientConfig.APICURIO_REQUEST_CA_BUNDLE_LOCATION)));
+            options.setSsl(true);
         }
         return options;
     }
