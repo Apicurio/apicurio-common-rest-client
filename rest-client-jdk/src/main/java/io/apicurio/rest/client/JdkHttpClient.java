@@ -3,6 +3,7 @@ package io.apicurio.rest.client;
 
 import static java.util.Objects.requireNonNull;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.http.HttpClient;
@@ -14,6 +15,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -116,6 +118,16 @@ public class JdkHttpClient implements ApicurioHttpClient {
             KeyStore truststore = KeyStore.getInstance(truststoreType);
             String truststorePwd = (String) configs.getOrDefault(ApicurioClientConfig.APICURIO_REQUEST_TRUSTSTORE_PASSWORD, "");
             truststore.load(new FileInputStream((String) configs.get(ApicurioClientConfig.APICURIO_REQUEST_TRUSTSTORE_LOCATION)), truststorePwd.toCharArray());
+            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            trustManagerFactory.init(truststore);
+            trustManagers = trustManagerFactory.getTrustManagers();
+        } else if (configs.containsKey(ApicurioClientConfig.APICURIO_REQUEST_CA_BUNDLE_LOCATION)) {
+            File serviceCaFile = new File((String)configs.get(ApicurioClientConfig.APICURIO_REQUEST_CA_BUNDLE_LOCATION));
+            KeyStore truststore = KeyStore.getInstance("JKS");
+            truststore.load(null);
+            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            truststore.setCertificateEntry("service-ca", cf.generateCertificate(new FileInputStream(serviceCaFile)));
+
             TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             trustManagerFactory.init(truststore);
             trustManagers = trustManagerFactory.getTrustManagers();
