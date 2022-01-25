@@ -35,6 +35,7 @@ public class OidcAuth implements Auth, AutoCloseable {
     private static final String BEARER = "Bearer ";
     private static final String CLIENT_CREDENTIALS_GRANT = "client_credentials";
     private static final String PASSWORD_GRANT = "password";
+    private int expireTokenBefore = 20;
 
     private final String clientId;
     private final String clientSecret;
@@ -48,6 +49,13 @@ public class OidcAuth implements Auth, AutoCloseable {
         this.clientId = clientId;
         this.clientSecret = clientSecret;
         this.apicurioHttpClient = httpClient;
+    }
+
+    public OidcAuth(ApicurioHttpClient httpClient, String clientId, String clientSecret, int expireTokenBefore) {
+        this.clientId = clientId;
+        this.clientSecret = clientSecret;
+        this.apicurioHttpClient = httpClient;
+        this.expireTokenBefore = expireTokenBefore;
     }
 
     /**
@@ -104,7 +112,12 @@ public class OidcAuth implements Auth, AutoCloseable {
     }
 
     private boolean isTokenExpired() {
-        return (int) (System.currentTimeMillis() / 1000L) > cachedAccessTokenExp;
+        return (int) (System.currentTimeMillis() / 1000L) > cachedAccessTokenExp();
+    }
+
+    private long cachedAccessTokenExp() {
+        //To prevent the token from being expired while making a request, we subtract 20 seconds from the expiration time
+        return cachedAccessTokenExp - expireTokenBefore;
     }
 
     @Override
