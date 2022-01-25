@@ -21,6 +21,8 @@ import io.apicurio.rest.client.auth.request.TokenRequestsProvider;
 import io.apicurio.rest.client.spi.ApicurioHttpClient;
 
 import java.net.URLEncoder;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -35,12 +37,13 @@ public class OidcAuth implements Auth, AutoCloseable {
     private static final String BEARER = "Bearer ";
     private static final String CLIENT_CREDENTIALS_GRANT = "client_credentials";
     private static final String PASSWORD_GRANT = "password";
+    private static final long TOKEN_EXPIRATION_REDUCTION_SEC = 2000;
 
     private final String clientId;
     private final String clientSecret;
 
     private String cachedAccessToken;
-    private long cachedAccessTokenExp;
+    private Instant cachedAccessTokenExp;
 
     private final ApicurioHttpClient apicurioHttpClient;
 
@@ -70,7 +73,14 @@ public class OidcAuth implements Auth, AutoCloseable {
             ).collect(Collectors.joining("&"));
             final AccessTokenResponse accessTokenResponse = apicurioHttpClient.sendRequest(TokenRequestsProvider.obtainAccessToken(paramsEncoded));
             this.cachedAccessToken = accessTokenResponse.getToken();
-            this.cachedAccessTokenExp = System.currentTimeMillis() / 1000 + accessTokenResponse.getExpiresIn();
+            /**
+             * expiresIn is in seconds
+             */
+            long expiresIn = accessTokenResponse.getExpiresIn();
+            if (expiresIn > TOKEN_EXPIRATION_REDUCTION_SEC) {
+                expiresIn -= TOKEN_EXPIRATION_REDUCTION_SEC;
+            }
+            this.cachedAccessTokenExp = Instant.now().plus(Duration.ofSeconds(expiresIn));
 
         } catch (JsonProcessingException e) {
             throw new IllegalStateException("Error found while trying to request a new token");
@@ -104,7 +114,7 @@ public class OidcAuth implements Auth, AutoCloseable {
     }
 
     private boolean isTokenExpired() {
-        return (int) (System.currentTimeMillis() / 1000L) > cachedAccessTokenExp;
+        return Instant.now().isAfter(cachedAccessTokenExp);
     }
 
     @Override
