@@ -7,7 +7,7 @@
     <groupId>io.apicurio</groupId>
     <artifactId>apicurio-common-rest-client</artifactId>
     <packaging>pom</packaging>
-    <version>0.1.6.Final</version>
+    <version>0.1.7-SNAPSHOT</version>
 
 
     <name>apicurio-common-rest-client</name>
