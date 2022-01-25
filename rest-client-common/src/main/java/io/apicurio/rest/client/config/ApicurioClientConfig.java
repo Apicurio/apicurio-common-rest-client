@@ -3,6 +3,7 @@ package io.apicurio.rest.client.config;
 public class ApicurioClientConfig {
 
     public static final String APICURIO_REQUEST_HEADERS_PREFIX = "apicurio.rest.request.headers.";
+    public static final String APICURIO_REQUEST_CA_BUNDLE_LOCATION = "apicurio.rest.request.ssl.ca-bundle.location";
     public static final String APICURIO_REQUEST_TRUSTSTORE_PREFIX = "apicurio.rest.request.ssl.truststore";
     public static final String APICURIO_REQUEST_TRUSTSTORE_LOCATION = APICURIO_REQUEST_TRUSTSTORE_PREFIX + ".location";
     public static final String APICURIO_REQUEST_TRUSTSTORE_TYPE = APICURIO_REQUEST_TRUSTSTORE_PREFIX + ".type";
