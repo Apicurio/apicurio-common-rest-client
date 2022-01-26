@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.util.Collections;
 
 public class AuthTest {
@@ -22,8 +23,8 @@ public class AuthTest {
 
     private static ApicurioHttpClient httpClient;
 
-    private OidcAuth createOidcAuth(String authServerUrl, String adminClientId, String test1) {
-        return new OidcAuth(httpClient, adminClientId, "test1");
+    private OidcAuth createOidcAuth(String adminClientId) {
+        return new OidcAuth(httpClient, adminClientId, "test1", Duration.ofSeconds(18));
     }
 
     @BeforeAll
@@ -35,23 +36,22 @@ public class AuthTest {
 
     @Test
     public void oidcAuthTest() throws InterruptedException {
-        OidcAuth auth = createOidcAuth(keycloakTestResource.getAuthServerUrl(), adminClientId, "test1");
+        OidcAuth auth = createOidcAuth(adminClientId);
 
         //Test token is reused
         String firstToken = auth.authenticate();
         String secondToken = auth.authenticate();
         Assertions.assertEquals(firstToken, secondToken);
 
-        //Wait until the token is expired
-        Thread.sleep(9000);
-
+        //After 3s the token should be expired since we're subtracting 20s from the expiration time and the lifespan has been set to 20s in the test realm.
+        Thread.sleep(3000);
         String thirdToken = auth.authenticate();
         Assertions.assertNotEquals(firstToken, thirdToken);
     }
 
     @Test
     public void basicAuthOidcTest() {
-        OidcAuth auth = createOidcAuth(keycloakTestResource.getAuthServerUrl(), adminClientId, "test1");
+        OidcAuth auth = createOidcAuth(adminClientId);
         final String authenticate = auth.obtainAccessTokenPasswordGrant(testUsername, testPassword);
 
         Assertions.assertNotNull(authenticate);
@@ -59,13 +59,13 @@ public class AuthTest {
 
     @Test
     public void basicAuthOidcTestWrondCreds() {
-        OidcAuth auth = createOidcAuth(keycloakTestResource.getAuthServerUrl(), adminClientId, "test1");
+        OidcAuth auth = createOidcAuth(adminClientId);
         Assertions.assertThrows(NotAuthorizedException.class, () -> auth.obtainAccessTokenPasswordGrant(testUsername, "22222"));
     }
 
     @Test
     public void basicAuthNonExistingClient() {
-        OidcAuth auth = createOidcAuth(keycloakTestResource.getAuthServerUrl(), "NonExistingClient", "test1");
+        OidcAuth auth = createOidcAuth("NonExistingClient");
         Assertions.assertThrows(AuthException.class, () -> auth.obtainAccessTokenPasswordGrant(testUsername, testPassword));
     }
 

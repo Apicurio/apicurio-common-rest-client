@@ -21,6 +21,8 @@ import io.apicurio.rest.client.auth.request.TokenRequestsProvider;
 import io.apicurio.rest.client.spi.ApicurioHttpClient;
 
 import java.net.URLEncoder;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -35,19 +37,30 @@ public class OidcAuth implements Auth, AutoCloseable {
     private static final String BEARER = "Bearer ";
     private static final String CLIENT_CREDENTIALS_GRANT = "client_credentials";
     private static final String PASSWORD_GRANT = "password";
+    private static final Duration DEFAULT_TOKEN_EXPIRATION_REDUCTION = Duration.ofSeconds(1);
 
     private final String clientId;
     private final String clientSecret;
+    private final Duration tokenExpirationReduction;
 
     private String cachedAccessToken;
-    private long cachedAccessTokenExp;
+    private Instant cachedAccessTokenExp;
 
     private final ApicurioHttpClient apicurioHttpClient;
 
     public OidcAuth(ApicurioHttpClient httpClient, String clientId, String clientSecret) {
+        this(httpClient, clientId, clientSecret, DEFAULT_TOKEN_EXPIRATION_REDUCTION);
+    }
+
+    public OidcAuth(ApicurioHttpClient httpClient, String clientId, String clientSecret, Duration tokenExpirationReduction) {
         this.clientId = clientId;
         this.clientSecret = clientSecret;
         this.apicurioHttpClient = httpClient;
+        if (null == tokenExpirationReduction) {
+            this.tokenExpirationReduction = DEFAULT_TOKEN_EXPIRATION_REDUCTION;
+        } else {
+            this.tokenExpirationReduction = tokenExpirationReduction;
+        }
     }
 
     /**
@@ -70,8 +83,15 @@ public class OidcAuth implements Auth, AutoCloseable {
             ).collect(Collectors.joining("&"));
             final AccessTokenResponse accessTokenResponse = apicurioHttpClient.sendRequest(TokenRequestsProvider.obtainAccessToken(paramsEncoded));
             this.cachedAccessToken = accessTokenResponse.getToken();
-            this.cachedAccessTokenExp = System.currentTimeMillis() / 1000 + accessTokenResponse.getExpiresIn();
-
+            /*
+              expiresIn is in seconds
+             */
+            Duration expiresIn = Duration.ofSeconds(accessTokenResponse.getExpiresIn());
+            if (expiresIn.compareTo(this.tokenExpirationReduction) > 0) {
+                //expiresIn is greater than tokenExpirationReduction
+                expiresIn = expiresIn.minus(this.tokenExpirationReduction);
+            }
+            this.cachedAccessTokenExp = Instant.now().plus(expiresIn);
         } catch (JsonProcessingException e) {
             throw new IllegalStateException("Error found while trying to request a new token");
         }
@@ -104,7 +124,7 @@ public class OidcAuth implements Auth, AutoCloseable {
     }
 
     private boolean isTokenExpired() {
-        return (int) (System.currentTimeMillis() / 1000L) > cachedAccessTokenExp;
+        return Instant.now().isAfter(this.cachedAccessTokenExp);
     }
 
     @Override
