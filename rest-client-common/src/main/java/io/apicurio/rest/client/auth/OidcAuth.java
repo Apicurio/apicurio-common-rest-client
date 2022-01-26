@@ -56,7 +56,11 @@ public class OidcAuth implements Auth, AutoCloseable {
         this.clientId = clientId;
         this.clientSecret = clientSecret;
         this.apicurioHttpClient = httpClient;
-        this.tokenExpirationReduction = tokenExpirationReduction;
+        if (null == tokenExpirationReduction) {
+            this.tokenExpirationReduction = DEFAULT_TOKEN_EXPIRATION_REDUCTION;
+        } else {
+            this.tokenExpirationReduction = tokenExpirationReduction;
+        }
     }
 
     /**

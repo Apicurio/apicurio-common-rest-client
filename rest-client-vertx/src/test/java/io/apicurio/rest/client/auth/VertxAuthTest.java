@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.util.Collections;
 
 public class VertxAuthTest {
@@ -72,6 +73,6 @@ public class VertxAuthTest {
     }
 
     private OidcAuth createOidcAuth(String adminClientId) {
-        return new OidcAuth(httpClient, adminClientId, "test1");
+        return new OidcAuth(httpClient, adminClientId, "test1", Duration.ofSeconds(20));
     }
 }
