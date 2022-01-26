@@ -83,8 +83,8 @@ public class OidcAuth implements Auth, AutoCloseable {
             ).collect(Collectors.joining("&"));
             final AccessTokenResponse accessTokenResponse = apicurioHttpClient.sendRequest(TokenRequestsProvider.obtainAccessToken(paramsEncoded));
             this.cachedAccessToken = accessTokenResponse.getToken();
-            /**
-             * expiresIn is in seconds
+            /*
+              expiresIn is in seconds
              */
             Duration expiresIn = Duration.ofSeconds(accessTokenResponse.getExpiresIn());
             if (expiresIn.compareTo(this.tokenExpirationReduction) > 0) {

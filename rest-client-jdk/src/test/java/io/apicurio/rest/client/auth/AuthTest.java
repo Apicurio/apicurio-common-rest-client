@@ -24,7 +24,7 @@ public class AuthTest {
     private static ApicurioHttpClient httpClient;
 
     private OidcAuth createOidcAuth(String adminClientId) {
-        return new OidcAuth(httpClient, adminClientId, "test1", Duration.ofSeconds(20));
+        return new OidcAuth(httpClient, adminClientId, "test1", Duration.ofSeconds(18));
     }
 
     @BeforeAll
