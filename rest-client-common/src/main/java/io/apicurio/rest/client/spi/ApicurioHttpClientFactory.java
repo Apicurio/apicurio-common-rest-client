@@ -29,7 +29,7 @@ public class ApicurioHttpClientFactory {
         return providerReference.compareAndSet(null, provider);
     }
 
-    private static ApicurioHttpClientProvider resolveProviderInstance() {
+    private synchronized static ApicurioHttpClientProvider resolveProviderInstance() {
         return serviceLoader.providers(true)
                 .next();
     }
