@@ -2,6 +2,7 @@ package io.apicurio.rest.client.response;
 
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.apicurio.rest.client.error.RestClientErrorHandler;
 import io.apicurio.rest.client.util.IoUtil;
@@ -26,6 +27,7 @@ public class ResponseHandler<T> implements Handler<AsyncResult<HttpResponse<Buff
         this.resultHolder = resultHolder;
         this.targetType = targetType;
         this.errorHandler = errorHandler;
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
     @SuppressWarnings("unchecked")
