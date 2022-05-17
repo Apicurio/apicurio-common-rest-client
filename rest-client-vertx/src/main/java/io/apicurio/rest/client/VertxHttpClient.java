@@ -44,6 +44,12 @@ public class VertxHttpClient implements ApicurioHttpClient {
         if (!basePath.endsWith("/")) {
             basePath += "/";
         }
+
+        Object disableAutoBasePathAppend = options.get("apicurio.rest.client.disable-auto-basepath-append");
+        if (!toBoolean(disableAutoBasePathAppend) && !basePath.endsWith(String.valueOf(options.get("apicurio.rest.client.auto-base-path")))) {
+            basePath = basePath + options.getOrDefault("apicurio.rest.client.auto-base-path", "");
+        }
+
         this.webClient = WebClient.create(vertx, createClientOptions(options));
         this.auth = auth;
         this.basePath = basePath;
@@ -172,6 +178,16 @@ public class VertxHttpClient implements ApicurioHttpClient {
         httpClientRequest.sendBuffer(buffer, responseHandler);
 
         return resultHolder;
+    }
+
+    private static boolean toBoolean(Object parameter) {
+        if (parameter == null) {
+            return false;
+        } else if (parameter instanceof Boolean) {
+            return (Boolean)parameter;
+        } else {
+            return parameter instanceof String && Boolean.parseBoolean((String) parameter);
+        }
     }
 
     @Override
