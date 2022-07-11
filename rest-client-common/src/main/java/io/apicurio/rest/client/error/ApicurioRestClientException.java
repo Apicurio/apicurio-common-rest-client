@@ -10,4 +10,8 @@ public abstract class ApicurioRestClientException extends RuntimeException {
     public ApicurioRestClientException(String error) {
         super(error);
     }
+    
+    public ApicurioRestClientException(Throwable throwable) {
+        super(throwable);
+    }
 }

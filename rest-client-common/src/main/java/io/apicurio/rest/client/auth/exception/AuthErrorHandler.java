@@ -26,11 +26,11 @@ public class AuthErrorHandler implements RestClientErrorHandler {
 
     @Override
     public ApicurioRestClientException parseError(Exception ex) {
-        throw new UnsupportedOperationException();
+        throw new AuthException(ex);
     }
 
     @Override
     public ApicurioRestClientException parseInputSerializingError(JsonProcessingException ex) {
-        throw new UnsupportedOperationException();
+        return new AuthException(ex);
     }
 }
