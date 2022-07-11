@@ -14,6 +14,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static io.apicurio.rest.client.config.ApicurioClientConfig.APICURIO_REQUEST_HEADERS_PREFIX;
+
 
 public class JdkClientTest {
 
@@ -23,7 +25,7 @@ public class JdkClientTest {
     @BeforeAll
     public static void init() throws JsonProcessingException {
         String mockServerUrl = wiremockCountriesServer.start();
-        JdkClientTest.jdkHttpClient = new JdkHttpClient(mockServerUrl, Collections.emptyMap(), null, null);
+        JdkClientTest.jdkHttpClient = new JdkHttpClient(mockServerUrl, Map.of(APICURIO_REQUEST_HEADERS_PREFIX, "issue #2581"), null, null);
     }
 
     @Test

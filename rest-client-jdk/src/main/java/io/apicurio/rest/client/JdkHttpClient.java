@@ -42,6 +42,7 @@ import io.apicurio.rest.client.util.UriUtil;
  */
 public class JdkHttpClient implements ApicurioHttpClient {
 
+    public static final String INVALID_EMPTY_HTTP_KEY = "";
     private HttpClient client;
     private final String endpoint;
     private final Auth auth;
@@ -84,6 +85,7 @@ public class JdkHttpClient implements ApicurioHttpClient {
                         .replace(ApicurioClientConfig.APICURIO_REQUEST_HEADERS_PREFIX, ""), map -> map.getValue().toString()));
 
         if (!requestHeaders.isEmpty()) {
+            requestHeaders.remove(INVALID_EMPTY_HTTP_KEY);
             requestHeaders.forEach(DEFAULT_HEADERS::put);
         }
     }
