@@ -9,4 +9,8 @@ public class AuthException extends ApicurioRestClientException {
     public AuthException(String error) {
         super(error);
     }
+
+    public AuthException(Throwable throwable) {
+        super(throwable);
+    }
 }
