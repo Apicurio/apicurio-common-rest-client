@@ -4,6 +4,7 @@ import io.apicurio.rest.client.auth.Auth;
 import io.apicurio.rest.client.error.RestClientErrorHandler;
 
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -30,7 +31,17 @@ public class ApicurioHttpClientFactory {
     }
 
     private synchronized static ApicurioHttpClientProvider resolveProviderInstance() {
-        return serviceLoader.providers(true)
-                .next();
+        final Iterator<ApicurioHttpClientProvider> providersIterator = serviceLoader.providers(true);
+        if (providersIterator.hasNext()) {
+            return providersIterator.next();
+        } else {
+            ApicurioHttpClientProvider p = providerReference.get();
+            if (p != null) {
+                return p;
+            } else {
+                throw new IllegalStateException(
+                        "No available ApicurioHttClientProvider provider found, try manually setting the provider using ApicurioHttpClientFactory.setProvider");
+            }
+        }
     }
 }
