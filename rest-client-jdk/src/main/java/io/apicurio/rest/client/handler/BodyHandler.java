@@ -1,15 +1,18 @@
 package io.apicurio.rest.client.handler;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.apicurio.rest.client.error.RestClientErrorHandler;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.http.HttpResponse;
+import java.util.Date;
 import java.util.function.Supplier;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+
+import io.apicurio.rest.client.error.RestClientErrorHandler;
 
 /**
  * @author Carles Arnal 'carnalca@redhat.com'
@@ -19,6 +22,11 @@ public class BodyHandler<W> implements HttpResponse.BodyHandler<Supplier<W>> {
     private final TypeReference<W> wClass;
     private final RestClientErrorHandler errorHandler;
     private static final ObjectMapper mapper = new ObjectMapper();
+    static {
+        SimpleModule module = new SimpleModule("Custom date handler");
+        module.addDeserializer(Date.class, new RegistryDateDeserializer());
+        mapper.registerModule(module);
+    }
 
     public BodyHandler(TypeReference<W> wClass, RestClientErrorHandler errorHandler) {
         this.wClass = wClass;
