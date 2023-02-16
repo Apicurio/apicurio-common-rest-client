@@ -17,6 +17,7 @@
 package io.apicurio.rest.client.handler;
 
 import java.io.IOException;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -35,7 +36,32 @@ import com.fasterxml.jackson.databind.JsonNode;
  */
 public class RegistryDateDeserializer extends JsonDeserializer<Date> {
 
-    private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+    /**
+     * thread-safe DateFormat, @see https://www.javacodegeeks.com/2010/07/java-best-practices-dateformat-in.html
+     */
+    private ThreadLocal<DateFormat> dateFormat = new ThreadLocal<>() {
+
+        @Override
+        public DateFormat get() {
+            return super.get();
+        }
+
+        @Override
+        protected DateFormat initialValue() {
+            return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+        }
+
+        @Override
+        public void remove() {
+            super.remove();
+        }
+
+        @Override
+        public void set(DateFormat value) {
+            super.set(value);
+        }
+
+    };
 
     /**
      * @see com.fasterxml.jackson.databind.JsonDeserializer#deserialize(com.fasterxml.jackson.core.JsonParser, com.fasterxml.jackson.databind.DeserializationContext)
@@ -51,7 +77,7 @@ public class RegistryDateDeserializer extends JsonDeserializer<Date> {
         }
 
         try {
-            return DATE_FORMATTER.parse(date);
+            return dateFormat.get().parse(date);
         } catch (ParseException e) {
         }
         throw new JsonParseException(parser, "Failed to parse date (not a supported format).");
