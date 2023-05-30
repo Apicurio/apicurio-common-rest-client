@@ -43,12 +43,12 @@ import io.apicurio.rest.client.util.UriUtil;
 public class JdkHttpClient implements ApicurioHttpClient {
 
     public static final String INVALID_EMPTY_HTTP_KEY = "";
-    private HttpClient client;
+    private final HttpClient client;
     private final String endpoint;
     private final Auth auth;
     private final RestClientErrorHandler errorHandler;
 
-    private static final Map<String, String> DEFAULT_HEADERS = new HashMap<>();
+    private final Map<String, String> DEFAULT_HEADERS = new HashMap<>();
     private static final ThreadLocal<Map<String, String>> requestHeaders = ThreadLocal.withInitial(Collections::emptyMap);
 
     public JdkHttpClient(String endpoint, Map<String, Object> configs, Auth auth, RestClientErrorHandler errorHandler) {
@@ -69,7 +69,7 @@ public class JdkHttpClient implements ApicurioHttpClient {
         this.errorHandler = errorHandler;
     }
 
-    private static HttpClient.Builder handleConfiguration(Map<String, Object> configs) {
+    private HttpClient.Builder handleConfiguration(Map<String, Object> configs) {
         HttpClient.Builder clientBuilder = HttpClient.newBuilder();
         clientBuilder.version(HttpClient.Version.HTTP_1_1);
         addHeaders(configs);
@@ -77,7 +77,7 @@ public class JdkHttpClient implements ApicurioHttpClient {
         return clientBuilder;
     }
 
-    private static void addHeaders(Map<String, Object> configs) {
+    private void addHeaders(Map<String, Object> configs) {
 
         Map<String, String> requestHeaders = configs.entrySet().stream()
                 .filter(map -> map.getKey().startsWith(ApicurioClientConfig.APICURIO_REQUEST_HEADERS_PREFIX))
@@ -86,7 +86,7 @@ public class JdkHttpClient implements ApicurioHttpClient {
 
         if (!requestHeaders.isEmpty()) {
             requestHeaders.remove(INVALID_EMPTY_HTTP_KEY);
-            requestHeaders.forEach(DEFAULT_HEADERS::put);
+            DEFAULT_HEADERS.putAll(requestHeaders);
         }
     }
 

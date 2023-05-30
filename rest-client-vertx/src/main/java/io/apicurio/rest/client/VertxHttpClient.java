@@ -37,7 +37,7 @@ public class VertxHttpClient implements ApicurioHttpClient {
     private final String basePath;
     private final RestClientErrorHandler errorHandler;
 
-    private static final Map<String, String> DEFAULT_HEADERS = new HashMap<>();
+    private final Map<String, String> DEFAULT_HEADERS = new HashMap<>();
     private static final ThreadLocal<Map<String, String>> requestHeaders = ThreadLocal.withInitial(Collections::emptyMap);
 
     public VertxHttpClient(Vertx vertx, String basePath, Map<String, Object> options, Auth auth, RestClientErrorHandler errorHandler) {
@@ -66,7 +66,7 @@ public class VertxHttpClient implements ApicurioHttpClient {
         return options;
     }
 
-    private static void processConfiguration(Map<String, Object> configs) {
+    private void processConfiguration(Map<String, Object> configs) {
         Map<String, String> requestHeaders = configs.entrySet().stream()
                 .filter(map -> map.getKey().startsWith(ApicurioClientConfig.APICURIO_REQUEST_HEADERS_PREFIX))
                 .collect(Collectors.toMap(map -> map.getKey()
