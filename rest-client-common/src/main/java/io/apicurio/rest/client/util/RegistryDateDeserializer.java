@@ -14,13 +14,7 @@
  * limitations under the License.
  */
 
-package io.apicurio.rest.client.handler;
-
-import java.io.IOException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+package io.apicurio.rest.client.util;
 
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -28,6 +22,12 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
+
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * A custom date deserializer for backwards compatibility.  Handles the date formats from 2.3.1.Final and also
@@ -64,7 +64,7 @@ public class RegistryDateDeserializer extends JsonDeserializer<Date> {
     };
 
     /**
-     * @see com.fasterxml.jackson.databind.JsonDeserializer#deserialize(com.fasterxml.jackson.core.JsonParser, com.fasterxml.jackson.databind.DeserializationContext)
+     * @see JsonDeserializer#deserialize(JsonParser, DeserializationContext)
      */
     @Override
     public Date deserialize(JsonParser parser, DeserializationContext context) throws IOException, JacksonException {
