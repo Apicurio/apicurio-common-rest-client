@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import io.apicurio.rest.client.error.RestClientErrorHandler;
+import io.apicurio.rest.client.util.RegistryDateDeserializer;
 
 /**
  * @author Carles Arnal 'carnalca@redhat.com'

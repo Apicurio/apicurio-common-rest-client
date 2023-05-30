@@ -4,13 +4,16 @@ package io.apicurio.rest.client.response;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.apicurio.rest.client.error.RestClientErrorHandler;
 import io.apicurio.rest.client.util.IoUtil;
+import io.apicurio.rest.client.util.RegistryDateDeserializer;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.ext.web.client.HttpResponse;
 
+import java.util.Date;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -22,6 +25,12 @@ public class ResponseHandler<T> implements Handler<AsyncResult<HttpResponse<Buff
     final TypeReference<T> targetType;
     final RestClientErrorHandler errorHandler;
     private static final ObjectMapper mapper = new ObjectMapper();
+
+    static {
+        SimpleModule module = new SimpleModule("Custom date handler");
+        module.addDeserializer(Date.class, new RegistryDateDeserializer());
+        mapper.registerModule(module);
+    }
 
     public ResponseHandler(CompletableFuture<T> resultHolder, TypeReference<T> targetType, RestClientErrorHandler errorHandler) {
         this.resultHolder = resultHolder;
