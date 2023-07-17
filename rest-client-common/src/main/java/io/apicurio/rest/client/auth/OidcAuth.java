@@ -23,6 +23,7 @@ import io.apicurio.rest.client.spi.ApicurioHttpClient;
 import java.net.URLEncoder;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -41,6 +42,7 @@ public class OidcAuth implements Auth, AutoCloseable {
 
     private final String clientId;
     private final String clientSecret;
+    private final String scope;
     private final Duration tokenExpirationReduction;
 
     private String cachedAccessToken;
@@ -53,9 +55,14 @@ public class OidcAuth implements Auth, AutoCloseable {
     }
 
     public OidcAuth(ApicurioHttpClient httpClient, String clientId, String clientSecret, Duration tokenExpirationReduction) {
+        this(httpClient, clientId, clientSecret, DEFAULT_TOKEN_EXPIRATION_REDUCTION, null);
+    }
+
+    public OidcAuth(ApicurioHttpClient httpClient, String clientId, String clientSecret, Duration tokenExpirationReduction, String scope) {
         this.clientId = clientId;
         this.clientSecret = clientSecret;
         this.apicurioHttpClient = httpClient;
+        this.scope = scope;
         if (null == tokenExpirationReduction) {
             this.tokenExpirationReduction = DEFAULT_TOKEN_EXPIRATION_REDUCTION;
         } else {
@@ -76,7 +83,15 @@ public class OidcAuth implements Auth, AutoCloseable {
 
     private void requestAccessToken() {
         try {
-            final Map<String, String> params = Map.of("grant_type", CLIENT_CREDENTIALS_GRANT, "client_id", clientId, "client_secret", clientSecret);
+            final Map<String, String> params = new HashMap<>();
+            params.put("grant_type", CLIENT_CREDENTIALS_GRANT);
+            params.put("client_id", clientId);
+            params.put("client_secret", clientSecret);
+
+            if (scope != null) {
+                params.put("scope", scope);
+            }
+
             final String paramsEncoded = params.entrySet().stream().map(entry -> String.join("=",
                     URLEncoder.encode(entry.getKey(), UTF_8),
                     URLEncoder.encode(entry.getValue(), UTF_8))
