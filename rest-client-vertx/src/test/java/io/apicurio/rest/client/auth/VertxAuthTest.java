@@ -73,6 +73,6 @@ public class VertxAuthTest {
     }
 
     private OidcAuth createOidcAuth(String adminClientId) {
-        return new OidcAuth(httpClient, adminClientId, "test1", Duration.ofSeconds(18));
+        return new OidcAuth(httpClient, adminClientId, "test1", Duration.ofSeconds(18), "openid profile email");
     }
 }
