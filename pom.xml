@@ -71,7 +71,7 @@
         <junit.version>5.10.0</junit.version>
         <wiremock.version>2.35.2</wiremock.version>
         <keycloak.testcontainers.version>1.8.1</keycloak.testcontainers.version>
-        <keycloak-admin-client.version>22.0.1</keycloak-admin-client.version>
+        <keycloak-admin-client.version>24.0.4</keycloak-admin-client.version>
         <surefire-plugin.version>2.22.2</surefire-plugin.version>
         <surefire-junit.version>1.3.2</surefire-junit.version>
     </properties>
