@@ -61,7 +61,7 @@
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
-        <jackson.version>2.17.1</jackson.version>
+        <jackson.version>2.18.0</jackson.version>
         <apache-commons.version>3.12.0</apache-commons.version>
         <vertx.version>4.5.8</vertx.version>
         <version.org.apache.felix.maven-bundle-plugin>5.1.9</version.org.apache.felix.maven-bundle-plugin>
